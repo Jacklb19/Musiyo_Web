@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Route, Routes, useParams, useSearchParams } from 'react-router-dom'
 import { api } from './api'
 
@@ -81,15 +81,75 @@ function Ficha() {
 }
 
 function RecorridoPage() {
-  const { data, error, loading } = useApi((signal) => api.recorrido('recorrido-prueba', signal), 'recorrido-prueba')
-  const [params] = useSearchParams()
+  const recorridoId = 'recorrido-prueba'
+  const { data, error, loading } = useApi((signal) => api.recorrido(recorridoId, signal), recorridoId)
+  const [params, setParams] = useSearchParams()
   const punto = params.get('punto')
   const elemento = params.get('elemento')
-  const validPoint = data?.salas.some((sala) => sala.puntos.some((item) => item.anclajeId === punto && (!elemento || item.elementoIds.includes(elemento))))
-  const unityUrl = import.meta.env.VITE_UNITY_WEBGL_URL
-  return <section className="page"><p className="eyebrow">Experiencia / recorrido</p><h1>Recorrido virtual</h1><p className="page-intro">La API define qué salas, puntos y elementos autorizados están disponibles.</p><Status loading={loading} error={error} />{data && <><div className="recorrido-meta"><span>Contrato v{data.schemaVersion}</span><span>{data.salas.length} sala{data.salas.length === 1 ? '' : 's'}</span></div>{punto && !validPoint && <p className="status error" role="alert">El punto o elemento solicitado no está disponible.</p>}{unityUrl && (!punto || validPoint) ? <iframe title="Recorrido Unity" className="unity-frame" src={unityUrl} allowFullScreen /> : <div className="walkthrough-placeholder"><span aria-hidden="true">◎</span><h2>Recorrido WebGL en preparación</h2><p>El contrato está disponible. El build Unity se conectará aquí cuando se publique por separado.</p></div>}<div className="room-list">{data.salas.map((sala) => <article key={sala.id}><span className="section-num">Sala {sala.orden + 1}</span><h2>{sala.id}</h2><ul>{sala.puntos.map((item) => <li key={item.anclajeId}><span>{item.anclajeId}</span><span>{item.elementoIds.length} elementos disponibles</span></li>)}</ul></article>)}</div></>}</section>
-}
+  const validPoint = data?.salas.some((sala) =>
+    sala.puntos.some((item) => item.anclajeId === punto && (!elemento || item.elementoIds.includes(elemento)),
+  ))
+  const unityUrl = import.meta.env.VITE_UNITY_WEBGL_URL || '/unity/index.html'
+  const frameRef = useRef<HTMLIFrameElement>(null)
+  const [frameSrc, setFrameSrc] = useState('')
 
+  useEffect(() => {
+    if (!data || frameSrc) return
+    const url = new URL(unityUrl, window.location.href)
+    if (url.origin !== window.location.origin) return
+    url.searchParams.set('recorrido', data.recorridoId)
+    if (punto && validPoint) url.searchParams.set('punto', punto)
+    if (elemento && validPoint) url.searchParams.set('elemento', elemento)
+    setFrameSrc(url.toString())
+  }, [data, frameSrc, unityUrl, punto, elemento, validPoint])
+
+  useEffect(() => {
+    function onUnityMessage(event: MessageEvent) {
+      if (event.origin !== window.location.origin || event.source !== frameRef.current?.contentWindow) return
+      const message = event.data
+      if (!data || !message || message.source !== 'musiyo-unity' ||
+        message.type !== 'point-selected' || message.schemaVersion !== 1 ||
+        message.recorridoId !== data.recorridoId || typeof message.puntoId !== 'string') return
+      const available = data.salas.some((sala) =>
+        sala.puntos.some((item) => item.anclajeId === message.puntoId),
+      )
+      if (!available || (punto === message.puntoId && !elemento)) return
+      setParams((current) => {
+        const next = new URLSearchParams(current)
+        next.set('punto', message.puntoId)
+        next.delete('elemento')
+        return next
+      }, { replace: true })
+    }
+    window.addEventListener('message', onUnityMessage)
+    return () => window.removeEventListener('message', onUnityMessage)
+  }, [data, punto, elemento, setParams])
+
+  return <section className="page">
+    <p className="eyebrow">Experiencia / recorrido</p>
+    <h1>Recorrido virtual</h1>
+    <p className="page-intro">La API define qué salas, puntos y elementos autorizados están disponibles.</p>
+    <Status loading={loading} error={error} />
+    {data && <>
+      <div className="recorrido-meta"><span>Contrato v{data.schemaVersion}</span><span>{data.salas.length} sala{data.salas.length === 1 ? '' : 's'}</span></div>
+      {punto && !validPoint && <p className="status error" role="alert">El punto o elemento solicitado no está disponible.</p>}
+      {frameSrc ? <iframe ref={frameRef} title="Recorrido Unity" className="unity-frame" src={frameSrc} allowFullScreen /> :
+        <div className="walkthrough-placeholder"><span aria-hidden="true">◎</span><h2>Recorrido WebGL no configurado</h2><p>El build Unity debe servirse desde el mismo origen que la web.</p></div>}
+      <div className="room-list">{data.salas.map((sala) => <article key={sala.id}>
+        <span className="section-num">Sala {sala.orden + 1}</span>
+        <h2>{sala.id}</h2>
+        <ul>{sala.puntos.map((item) => <li key={item.anclajeId}>
+          <Link reloadDocument to={'/recorrido?punto=' + encodeURIComponent(item.anclajeId)}>{item.anclajeId}</Link>
+          <span>{item.elementoIds.length} elementos disponibles</span>
+        </li>)}</ul>
+      </article>)}</div>
+      {punto && validPoint && data.salas.flatMap((sala) => sala.puntos)
+        .filter((item) => item.anclajeId === punto)
+        .flatMap((item) => item.elementoIds)
+        .map((id) => <p key={id}><Link to={'/elementos/' + encodeURIComponent(id)}>Abrir ficha del elemento {id} ↗</Link></p>)}
+    </>}
+  </section>
+}
 function NotFound() {
   return <section className="page"><h1>Página no encontrada</h1><Link to="/">Volver al inicio</Link></section>
 }
