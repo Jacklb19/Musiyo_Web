@@ -1,0 +1,69 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500&display=swap');
+
+:root{font-family:'DM Sans',system-ui,sans-serif;color:#172c29;background:#f5f2ea;font-synthesis:none}
+*{box-sizing:border-box}
+body{margin:0;min-width:320px}
+a{color:inherit;text-decoration:none}
+button,input{font:inherit}
+.site-shell{min-height:100vh;display:flex;flex-direction:column}
+.site-header{height:88px;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(24px,5vw,88px);border-bottom:1px solid #d6d8ce;background:#f5f2ea}
+.brand{display:flex;align-items:center;gap:14px;font-family:'Fraunces',Georgia,serif;font-size:24px;font-weight:500}
+.brand-mark{display:grid;place-items:center;width:43px;height:43px;border-radius:50%;background:#213c37;color:#f7f0d9;font-size:27px}
+.brand-sub{font-size:18px}
+nav{display:flex;gap:36px;font-size:14px;font-weight:700}
+nav a{color:#64736e;padding:8px 0}
+nav a.active,nav a:hover{color:#172c29;border-bottom:2px solid #be6a43}
+main{flex:1}
+.hero{display:grid;grid-template-columns:1.05fr .95fr;min-height:600px;background:#e5e8dc}
+.hero-copy{padding:clamp(56px,8vw,132px) clamp(24px,7vw,120px)}
+.eyebrow,.section-num{font-size:11px;font-weight:700;letter-spacing:.19em;text-transform:uppercase;color:#9b593b}
+h1,h2,p{margin-top:0}
+h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:400}
+.hero h1{font-size:clamp(62px,7.5vw,120px);line-height:.98;letter-spacing:-.055em;margin:20px 0 28px;max-width:700px}
+.hero h1 em{display:block;font-weight:400;color:#9c684d}
+.lead{font-size:clamp(18px,1.7vw,23px);line-height:1.55;max-width:620px;color:#475d55}
+.actions{display:flex;flex-wrap:wrap;gap:14px;margin-top:42px}
+.button{display:inline-flex;align-items:center;gap:40px;padding:16px 22px;border-radius:4px;font-size:14px;font-weight:700}
+.primary{background:#21423a;color:white}.primary:hover{background:#315a50}
+.secondary{border:1px solid #61766b}.secondary:hover{background:#d5ded1}
+.hero-art{position:relative;overflow:hidden;min-height:400px;background:radial-gradient(circle at 65% 43%,#ba8e68 0,#b57555 16%,#8b513e 39%,#29413b 80%)}
+.hero-art:before,.hero-art:after{content:'';position:absolute;inset:8%;border:1px solid #e8d0a955;border-radius:50%;transform:rotate(-20deg) scaleX(.67)}
+.hero-art:after{inset:19%;transform:rotate(50deg) scaleX(.65)}
+.orbit{position:absolute;border:1px solid #f0dec285;border-radius:50%;left:50%;top:50%;transform:translate(-50%,-50%) rotate(55deg) scaleX(.5);width:95%;height:95%}
+.orbit-two{transform:translate(-50%,-50%) rotate(-40deg) scaleX(.4);width:70%;height:70%}
+.center-mark{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font:400 clamp(100px,15vw,250px) 'Fraunces',Georgia,serif;color:#f5e4c9;text-shadow:0 12px 50px #402e2588}
+.intro-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#d6d8ce;border-bottom:1px solid #d6d8ce}
+.intro-grid article{background:#f5f2ea;padding:64px clamp(24px,7vw,120px)}
+.intro-grid h2{font-size:42px;margin:24px 0 12px}
+.intro-grid p{color:#5c6d66;line-height:1.6;max-width:440px}
+.intro-grid a{display:inline-block;margin-top:14px;font-size:14px;font-weight:700;color:#9b593b}
+.page{max-width:1320px;margin:0 auto;padding:70px clamp(24px,5vw,80px) 120px}
+.page h1{font-size:clamp(48px,5vw,78px);letter-spacing:-.04em;margin:15px 0 16px}
+.page-intro{font-size:18px;color:#5b6d64;line-height:1.6;margin-bottom:40px}
+.status{padding:22px 28px;background:#e7ece4;border-left:3px solid #557668}
+.status.error{background:#f4e6e0;border-color:#af6248;color:#6a3529}
+.search-label{display:block;font-size:13px;font-weight:700;margin-bottom:10px}
+input[type=search]{width:min(100%,560px);padding:16px 18px;border:1px solid #bcc8bb;border-radius:4px;background:#fffdf9;color:#172c29;margin-bottom:34px}
+input:focus-visible,a:focus-visible{outline:3px solid #a96543;outline-offset:3px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px}
+.card{position:relative;min-height:250px;padding:32px;background:#e8e8dd;border:1px solid #d9dbce}
+.card:hover{background:#dce4d7}
+.card h2{font-size:32px;margin:24px 0 10px}
+.card p{color:#586c63;line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.card-arrow{position:absolute;right:28px;bottom:22px;font-size:26px}
+.empty,.walkthrough-placeholder{text-align:center;border:1px dashed #aebbab;padding:65px 24px;background:#eceee5}
+.empty-symbol{font-size:62px;color:#a7684a}
+.empty h2,.walkthrough-placeholder h2{font-size:34px;margin:15px 0}
+.empty p,.walkthrough-placeholder p{color:#607167;line-height:1.6}
+.back{display:inline-block;font-size:14px;font-weight:700;color:#9b593b;margin-bottom:35px}
+.ficha{max-width:760px}.ficha section{border-top:1px solid #cbd2c5;padding-top:26px;margin-top:30px}
+.ficha h2{font-size:30px}.ficha section p{line-height:1.7;white-space:pre-wrap}
+.recorrido-meta{display:flex;gap:12px;margin-bottom:20px}.recorrido-meta span{padding:9px 14px;background:#e0e6dc;font-size:12px;font-weight:700;border-radius:40px}
+.walkthrough-placeholder>span{font-size:54px;color:#9b593b}
+.unity-frame{display:block;width:100%;height:min(68vw,680px);border:0;background:#172c29}
+.room-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-top:28px}
+.room-list article{padding:28px;background:#e7e9df}.room-list h2{font-size:30px;margin:12px 0 20px}
+.room-list ul{list-style:none;padding:0;margin:0}.room-list li{display:flex;justify-content:space-between;gap:20px;padding:13px 0;border-top:1px solid #c8d1c3;font-size:13px}.room-list li span:last-child{color:#68776c}
+footer{display:flex;justify-content:space-between;gap:20px;padding:30px clamp(24px,5vw,88px);background:#172c29;color:#d4decf;font-size:12px}
+@media(max-width:800px){.site-header{height:auto;min-height:76px;flex-wrap:wrap;gap:12px;padding-top:14px;padding-bottom:14px}nav{gap:18px}.hero{grid-template-columns:1fr}.hero-art{min-height:330px}.hero-copy{padding:70px 28px}.intro-grid{grid-template-columns:1fr}footer{flex-direction:column}}
+@media(max-width:520px){.brand-sub{display:none}.hero h1{font-size:58px}.page{padding-top:50px}.room-list li{flex-direction:column;gap:4px}}
