@@ -13,9 +13,13 @@ Frontend React + TypeScript para el catálogo público de Musiyo Bëtsknaté y l
 ## Estado funcional
 
 - Inicio, catálogo con búsqueda local sobre fichas públicas, detalle y estados vacíos.
-- Vista de recorrido que consulta el contrato v1 de salas, puntos y elementos.
-- Opción `VITE_UNITY_WEBGL_URL` para incrustar un build WebGL publicado por separado. El build Unity no se versiona aquí.
+- Vista de recorrido que consulta el contrato v1 de salas, puntos y elementos; abre Unity en el punto solicitado y refleja en la URL la selección hecha con Tab.
+- `npm.cmd run unity:sync` copia el build Unity local a `public/unity/`. La carpeta generada está ignorada por Git. `VITE_UNITY_WEBGL_URL` permite cambiar su ruta, siempre bajo el mismo origen.
 
-Aún falta implementar el puente de navegación bidireccional con Unity y la edición autenticada del Validador Cultural. No se incluyen contenidos culturales de ejemplo.
+El puente de puntos funciona con el contrato de prueba. La selección de elementos y la edición autenticada del Validador Cultural siguen pendientes. No se incluyen contenidos culturales de ejemplo.
 
-En PowerShell de este equipo, usa `npm.cmd`: el comando `npm` se está resolviendo hacia a una instalación global incompleta.
+En PowerShell de este equipo, usa `npm.cmd`: el comando `npm` se está resolviendo hacia una instalación global incompleta.
+
+## Probar recorrido local
+
+Con la API iniciada y el recorrido sintético creado con `python -m app.seed`, genera el WebGL desde Unity y ejecuta `npm.cmd run unity:sync`. Abre `/recorrido?punto=punto-02` en la web; Unity debe enfocar ese punto. Con `Tab` en Unity, la URL web debe mostrar el nuevo punto. El contrato y los archivos se consultan bajo el mismo origen.
