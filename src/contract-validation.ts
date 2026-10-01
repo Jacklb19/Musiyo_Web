@@ -1,7 +1,8 @@
 import tourSchema from '../contracts/tour.v1.schema.json' with { type: 'json' }
 import elementSchema from '../contracts/element.v1.schema.json' with { type: 'json' }
 import bridgeSchema from '../contracts/bridge.v1.schema.json' with { type: 'json' }
-import type { Element, SelectionConfirmed, Tour } from './contracts.ts'
+import clearedSchema from '../contracts/bridge-clear.v1.schema.json' with { type: 'json' }
+import type { Element, SelectionConfirmed, SelectionCleared, Tour } from './contracts.ts'
 
 type Schema = {
   $ref?: string
@@ -93,4 +94,8 @@ export function parseElement(value: unknown): Element {
 
 export function parseSelection(value: unknown): SelectionConfirmed | null {
   return matches(value, bridgeSchema as Schema, bridgeSchema as Schema) ? value as SelectionConfirmed : null
+}
+
+export function parseClearedSelection(value: unknown): SelectionCleared | null {
+  return matches(value, clearedSchema as Schema, clearedSchema as Schema) ? value as SelectionCleared : null
 }

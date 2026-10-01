@@ -40,7 +40,7 @@ h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:400}
 .page{max-width:1320px;margin:0 auto;padding:70px clamp(24px,5vw,80px) 120px}
 .page h1{font-size:clamp(48px,5vw,78px);letter-spacing:-.04em;margin:15px 0 16px}
 .page-intro{font-size:18px;color:#5b6d64;line-height:1.6;margin-bottom:40px}
-.status{padding:22px 28px;background:#e7ece4;border-left:3px solid #557668}
+.status{display:block;padding:22px 28px;background:#e7ece4;border-left:3px solid #557668}
 .status.error{background:#f4e6e0;border-color:#af6248;color:#6a3529}
 .search-label{display:block;font-size:13px;font-weight:700;margin-bottom:10px}
 input[type=search]{width:min(100%,560px);padding:16px 18px;border:1px solid #bcc8bb;border-radius:4px;background:#fffdf9;color:#172c29;margin-bottom:34px}
@@ -76,3 +76,9 @@ footer{display:flex;justify-content:space-between;gap:20px;padding:30px clamp(24
 .text-room h2{font-size:36px}.text-room h3{font-size:22px}.text-room li{margin:20px 0}.text-room p{line-height:1.65}
 summary{cursor:pointer;font-weight:600;padding:12px 0}summary:focus-visible,button:focus-visible{outline:3px solid #a96543;outline-offset:3px}
 footer nav{font-size:12px;flex-wrap:wrap;gap:20px}footer nav a{color:#d4decf}
+
+.unity-canvas { display: block; width: 100%; height: min(70vh, 800px); background: #102b26; border-radius: 8px; }
+.unity-canvas[hidden] { display: none; }
+.unity-host { margin: 2rem 0; }
+.unity-host progress { display: block; width: 100%; margin-top: .7rem; }
+.tour-detail { border-top: 1px solid #cbd2c5; margin-top: 2rem; }
