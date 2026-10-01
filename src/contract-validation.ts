@@ -5,7 +5,8 @@ import clearedSchema from '../contracts/bridge-clear.v1.schema.json' with { type
 import catalogSchema from '../contracts/catalog.v1.schema.json' with { type: 'json' }
 import facetSchema from '../contracts/catalog-facet.v1.schema.json' with { type: 'json' }
 import accessSchema from '../contracts/resource-access.v1.schema.json' with { type: 'json' }
-import type { CatalogFacet, CatalogPage, Element, ResourceAccess, SelectionConfirmed, SelectionCleared, Tour } from './contracts.ts'
+import sessionSchema from '../contracts/validator-session.v1.schema.json' with { type: 'json' }
+import type { CatalogFacet, CatalogPage, Element, ResourceAccess, SelectionConfirmed, SelectionCleared, Tour, ValidatorSession } from './contracts.ts'
 
 type Schema = {
   $ref?: string
@@ -19,8 +20,10 @@ type Schema = {
   additionalProperties?: boolean
   items?: Schema
   minItems?: number
+  maxItems?: number
   uniqueItems?: boolean
   minLength?: number
+  maxLength?: number
   minimum?: number
   maximum?: number
   pattern?: string
@@ -45,10 +48,12 @@ function matches(value: unknown, schema: Schema, root: Schema): boolean {
           ? matches(item, schema.properties[field], root) : schema.additionalProperties !== false)
     case 'array':
       return Array.isArray(value) && value.length >= (schema.minItems || 0) &&
+        value.length <= (schema.maxItems ?? Infinity) &&
         (!schema.uniqueItems || new Set(value.map((item) => JSON.stringify(item))).size === value.length) &&
         value.every((item) => matches(item, schema.items!, root))
     case 'string':
       return typeof value === 'string' && value.length >= (schema.minLength || 0) &&
+        value.length <= (schema.maxLength ?? Infinity) &&
         (!schema.pattern || new RegExp(schema.pattern).test(value)) &&
         (schema.format !== 'date-time' || !Number.isNaN(Date.parse(value)))
     case 'integer':
@@ -125,4 +130,12 @@ export function parseResourceAccess(value: unknown): ResourceAccess {
   try { url = new URL(access.url, 'https://api.invalid') } catch { throw new Error('URL de recurso incompatible') }
   if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password) throw new Error('URL de recurso incompatible')
   return access
+}
+
+export function parseValidatorSession(value: unknown): ValidatorSession {
+  if (!matches(value, sessionSchema as Schema, sessionSchema as Schema)) throw new Error('Sesión incompatible')
+  const session = value as ValidatorSession
+  if (session.authenticated !== (!!session.user && !!session.csrf_token) ||
+      !session.authenticated && (session.user != null || session.csrf_token != null)) throw new Error('Estado de sesión incompatible')
+  return session
 }

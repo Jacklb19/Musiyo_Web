@@ -38,6 +38,12 @@ export interface Credit {
   name: string
 }
 
+export interface DetailCorrection {
+  title?: string | null
+  description?: string | null
+  interpretations?: (InterpretationCorrection)[]
+}
+
 export interface Element {
   slug: string
   language?: "es"
@@ -76,9 +82,19 @@ export interface Health {
   status: "ok"
 }
 
+export interface InterpretationCorrection {
+  block_id: string
+  text: string
+}
+
 export interface LastModified {
   date: string
   author: string
+}
+
+export interface LoginRequest {
+  username: string
+  password: string
 }
 
 export interface NamedTerm {
@@ -98,7 +114,7 @@ export interface Problem {
   type: string
   title: string
   status: number
-  code: "not_found" | "schema_incompatible" | "validation" | "service_unavailable"
+  code: "not_found" | "schema_incompatible" | "validation" | "service_unavailable" | "unauthenticated" | "forbidden" | "rate_limited"
   detail: string
 }
 
@@ -191,4 +207,16 @@ export interface TourMetadata {
   key: string
   name: string
   revision?: string | null
+}
+
+export interface ValidatorProfile {
+  username: string
+  name: string
+}
+
+export interface ValidatorSession {
+  schema_version: 1
+  authenticated: boolean
+  user?: ValidatorProfile | null
+  csrf_token?: string | null
 }
