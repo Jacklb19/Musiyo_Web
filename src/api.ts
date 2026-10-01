@@ -1,29 +1,4 @@
-export interface Elemento {
-  id: string
-  titulo: string
-  descripcion: string
-  interpretacion: string
-  creditos: string
-  fuentes: string
-  restricciones: string
-}
-
-export interface Punto {
-  anclajeId: string
-  elementoIds: string[]
-}
-
-export interface Sala {
-  id: string
-  orden: number
-  puntos: Punto[]
-}
-
-export interface Recorrido {
-  schemaVersion: 1
-  recorridoId: string
-  salas: Sala[]
-}
+import { parseElement, parseTour } from './contract-validation'
 
 const base = (import.meta.env.VITE_API_BASE_URL || '/api/v1').replace(/\/$/, '')
 
@@ -36,7 +11,12 @@ async function get<T>(path: string, signal?: AbortSignal): Promise<T> {
 }
 
 export const api = {
-  elementos: (signal?: AbortSignal) => get<Elemento[]>('/elementos', signal),
-  elemento: (id: string, signal?: AbortSignal) => get<Elemento>('/elementos/' + encodeURIComponent(id), signal),
-  recorrido: (id: string, signal?: AbortSignal) => get<Recorrido>('/recorridos/' + encodeURIComponent(id), signal),
+  elements: async (signal?: AbortSignal) => {
+    const items = await get<unknown>('/elements', signal)
+    if (!Array.isArray(items)) throw new Error('Catálogo incompatible')
+    return items.map(parseElement)
+  },
+  element: async (id: string, signal?: AbortSignal) => parseElement(await get<unknown>('/elements/' + encodeURIComponent(id), signal)),
+  tour: async (id: string, signal?: AbortSignal) =>
+    parseTour(await get<unknown>('/tours/' + encodeURIComponent(id) + '?schema_version=1', signal)),
 }

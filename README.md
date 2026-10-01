@@ -4,7 +4,7 @@ Frontend React + TypeScript para el catálogo público de Musiyo Bëtsknaté y l
 
 ## Inicio local
 
-1. Instalar Node.js 20.19+ (o 22.12+) y npm.
+1. Instalar Node.js 24 y npm (las pruebas usan su soporte TypeScript).
 2. Ejecutar `npm.cmd install` y `npm.cmd run dev`.
 3. Iniciar Musiyo API en `http://127.0.0.1:8000`; Vite envía `/api` a ese servidor durante desarrollo.
 
@@ -13,13 +13,13 @@ Frontend React + TypeScript para el catálogo público de Musiyo Bëtsknaté y l
 ## Estado funcional
 
 - Inicio, catálogo con búsqueda local sobre fichas públicas, detalle y estados vacíos.
-- Vista de recorrido que consulta el contrato v1 de salas, puntos y elementos; abre Unity en el punto solicitado y refleja en la URL la selección hecha con Tab.
+- Vista de recorrido que consulta el contrato v1 en inglés; abre Unity en el punto solicitado y refleja en la URL la selección hecha con Tab.
 - `npm.cmd run unity:sync` copia el build Unity local a `public/unity/`. La carpeta generada está ignorada por Git. `VITE_UNITY_WEBGL_URL` permite cambiar su ruta, siempre bajo el mismo origen.
 
-El puente de puntos funciona con el contrato de prueba. La selección de elementos y la edición autenticada del Validador Cultural siguen pendientes. No se incluyen contenidos culturales de ejemplo.
+`npm.cmd run contracts:check` verifica tipos generados y copias SHA-256; `npm.cmd test` valida ejemplos y mensajes v1. La selección de elementos, el cargador Unity en el mismo documento (T-36) y la edición autenticada siguen pendientes. No se incluyen contenidos culturales de ejemplo.
 
 En PowerShell de este equipo, usa `npm.cmd`: el comando `npm` se está resolviendo hacia una instalación global incompleta.
 
 ## Probar recorrido local
 
-Con la API iniciada y el recorrido sintético creado con `python -m app.seed`, genera el WebGL desde Unity y ejecuta `npm.cmd run unity:sync`. Abre `/recorrido?punto=punto-02` en la web; Unity debe enfocar ese punto. Con `Tab` en Unity, la URL web debe mostrar el nuevo punto. El contrato y los archivos se consultan bajo el mismo origen.
+Con la API iniciada y el recorrido sintético creado con `python -m app.seed`, genera el WebGL desde Unity y ejecuta `npm.cmd run unity:sync`. Abre `/recorrido?point=punto-02` en la web; Unity debe enfocar ese punto. Con `Tab` en Unity, la URL web debe mostrar el nuevo punto. El contrato y los archivos se consultan bajo el mismo origen.
