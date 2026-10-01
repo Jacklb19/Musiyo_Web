@@ -4,25 +4,8 @@ import { api } from './api'
 import { parseSelection, parseClearedSelection } from './contract-validation'
 import { UnityTour, type UnityInstance } from './UnityTour'
 import { confirmedSelection, isAvailableSelection } from './tour-selection'
-
-function useApi<T>(load: (signal: AbortSignal) => Promise<T>) {
-  const [result, setResult] = useState<{ request: typeof load; data: T | null; error: string } | null>(null)
-
-  useEffect(() => {
-    const controller = new AbortController()
-    load(controller.signal)
-      .then((data) => {
-        if (!controller.signal.aborted) setResult({ request: load, data, error: '' })
-      })
-      .catch((reason: unknown) => {
-        if (!controller.signal.aborted) setResult({ request: load, data: null,
-          error: reason instanceof Error ? reason.message : 'Error inesperado' })
-      })
-    return () => controller.abort()
-  }, [load])
-
-  return result?.request === load ? { ...result, loading: false } : { data: null, error: '', loading: true }
-}
+import { useApi } from './use-api'
+import { Catalog } from './Catalog'
 
 function Status({ loading, error }: { loading: boolean; error: string }) {
   if (loading) return <output className="status">Cargando contenido autorizado…</output>
@@ -50,25 +33,6 @@ function Home() {
         <article><span className="section-num">02 / Experiencia</span><h2>Recorrido</h2><p>La estructura de salas y puntos se consulta desde la API con identificadores compartidos con Unity.</p><Link to="/recorrido">Abrir recorrido <span aria-hidden="true">↗</span></Link></article>
       </section>
     </>
-  )
-}
-
-function Catalog() {
-  const { data, error, loading } = useApi(api.elements)
-  const [query, setQuery] = useState('')
-  const visible = data?.filter((item) => (item.title + ' ' + item.description).toLocaleLowerCase('es').includes(query.toLocaleLowerCase('es'))) || []
-  return (
-    <section className="page">
-      <p className="eyebrow">Archivo / catálogo</p>
-      <h1>Elementos publicados</h1>
-      <p className="page-intro">Solo se muestran fichas autorizadas por la API.</p>
-      <Status loading={loading} error={error} />
-      {data && <>
-        <label className="search-label" htmlFor="buscar">Buscar en el catálogo</label>
-        <input id="buscar" type="search" placeholder="Buscar por título o descripción" value={query} onChange={(event) => setQuery(event.target.value)} />
-        {visible.length ? <div className="cards">{visible.map((item, index) => <Link className="card" key={item.slug} to={'/elementos/' + encodeURIComponent(item.slug)}><span className="section-num">Ficha / {String(index + 1).padStart(2, '0')}</span><h2>{item.title}</h2><p>{item.description}</p><span className="card-arrow" aria-hidden="true">↗</span></Link>)}</div> : <div className="empty"><span className="empty-symbol" aria-hidden="true">◇</span><h2>{query ? 'Sin resultados' : 'Aún no hay fichas publicadas'}</h2><p>{query ? 'Prueba con otra búsqueda.' : 'Los contenidos aparecerán aquí después de su aprobación y autorización.'}</p></div>}
-      </>}
-    </section>
   )
 }
 
