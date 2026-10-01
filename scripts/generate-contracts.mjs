@@ -15,6 +15,8 @@ const openapi = JSON.parse(readFileSync(path('contracts/openapi.json'), 'utf8'))
 const schemas = { ...openapi.components.schemas }
 const bridge = JSON.parse(readFileSync(path('contracts/bridge.v1.schema.json'), 'utf8'))
 Object.assign(schemas, bridge.$defs, { SelectionConfirmed: bridge })
+const cleared = JSON.parse(readFileSync(path('contracts/bridge-clear.v1.schema.json'), 'utf8'))
+Object.assign(schemas, cleared.$defs, { SelectionCleared: cleared })
 const names = Object.keys(schemas).filter((name) => !['HTTPValidationError', 'ValidationError'].includes(name)).sort()
 const typeOf = (property) => {
   if (property.$ref) return property.$ref.split('/').at(-1)

@@ -1,34 +1,31 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Link, NavLink, Route, Routes, useParams, useSearchParams } from 'react-router-dom'
 import { api } from './api'
-import { parseSelection } from './contract-validation'
+import { parseSelection, parseClearedSelection } from './contract-validation'
+import { UnityTour, type UnityInstance } from './UnityTour'
+import { confirmedSelection, isAvailableSelection } from './tour-selection'
 
-function useApi<T>(load: (signal: AbortSignal) => Promise<T>, key: string) {
-  const [data, setData] = useState<T | null>(null)
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(true)
+function useApi<T>(load: (signal: AbortSignal) => Promise<T>) {
+  const [result, setResult] = useState<{ request: typeof load; data: T | null; error: string } | null>(null)
 
   useEffect(() => {
     const controller = new AbortController()
-    setLoading(true)
-    setError('')
-    setData(null)
     load(controller.signal)
-      .then(setData)
-      .catch((reason: unknown) => {
-        if (!controller.signal.aborted) setError(reason instanceof Error ? reason.message : 'Error inesperado')
+      .then((data) => {
+        if (!controller.signal.aborted) setResult({ request: load, data, error: '' })
       })
-      .finally(() => {
-        if (!controller.signal.aborted) setLoading(false)
+      .catch((reason: unknown) => {
+        if (!controller.signal.aborted) setResult({ request: load, data: null,
+          error: reason instanceof Error ? reason.message : 'Error inesperado' })
       })
     return () => controller.abort()
-  }, [key])
+  }, [load])
 
-  return { data, error, loading }
+  return result?.request === load ? { ...result, loading: false } : { data: null, error: '', loading: true }
 }
 
 function Status({ loading, error }: { loading: boolean; error: string }) {
-  if (loading) return <p className="status" role="status">Cargando contenido autorizado…</p>
+  if (loading) return <output className="status">Cargando contenido autorizado…</output>
   if (error) return <p className="status error" role="alert">{error}</p>
   return null
 }
@@ -57,7 +54,7 @@ function Home() {
 }
 
 function Catalog() {
-  const { data, error, loading } = useApi(api.elements, 'elements')
+  const { data, error, loading } = useApi(api.elements)
   const [query, setQuery] = useState('')
   const visible = data?.filter((item) => (item.title + ' ' + item.description).toLocaleLowerCase('es').includes(query.toLocaleLowerCase('es'))) || []
   return (
@@ -75,9 +72,11 @@ function Catalog() {
   )
 }
 
-function Detail() {
-  const { id = '' } = useParams()
-  const { data, error, loading } = useApi((signal) => api.element(id, signal), id)
+function Detail({ elementId }: { elementId?: string } = {}) {
+  const { id: routeId = '' } = useParams()
+  const id = elementId || routeId
+  const load = useCallback((signal: AbortSignal) => api.element(id, signal), [id])
+  const { data, error, loading } = useApi(load)
   const blockLabels = { documented_fact: 'Información documentada', testimony: 'Testimonio', interpretation: 'Interpretación' }
   return <section className="page">
     <Link className="back" to="/catalogo">← Volver al catálogo</Link>
@@ -102,80 +101,89 @@ function Detail() {
 }
 
 function TourPage() {
-  const tourId = 'recorrido-prueba'
-  const { data, error, loading } = useApi((signal) => api.tour(tourId, signal), tourId)
+  const tourKey = import.meta.env.VITE_TOUR_KEY || 'museum-main'
+  const load = useCallback((signal: AbortSignal) => api.tour(tourKey, signal), [tourKey])
+  const { data, error, loading } = useApi(load)
   const [params, setParams] = useSearchParams()
   const point = params.get('point')
   const element = params.get('element')
-  const validPoint = data?.rooms.some((room) =>
-    room.points.some((item) => item.key === point && (!element || item.elements.some((entry) => entry.slug === element)),
-  ))
-  const desktopAvailable = window.matchMedia('(min-width: 1024px) and (pointer: fine)').matches
-  const unityUrl = import.meta.env.VITE_UNITY_WEBGL_URL || '/unity/index.html'
-  const frameRef = useRef<HTMLIFrameElement>(null)
-  const [frameSrc, setFrameSrc] = useState('')
+  const validPoint = !!data && isAvailableSelection(data, point, element)
+  const [instance, setInstance] = useState<UnityInstance | null>(null)
+  const [desktopAvailable, setDesktopAvailable] = useState(false)
 
   useEffect(() => {
-    if (!data || frameSrc) return
-    const url = new URL(unityUrl, window.location.href)
-    if (url.origin !== window.location.origin) return
-    url.searchParams.set('tour', data.tour.key)
-    if (point && validPoint) url.searchParams.set('point', point)
-    if (element && validPoint) url.searchParams.set('element', element)
-    setFrameSrc(url.toString())
-  }, [data, frameSrc, unityUrl, point, element, validPoint])
+    const media = window.matchMedia('(min-width: 1024px) and (pointer: fine)')
+    const update = () => {
+      const probe = document.createElement('canvas')
+      const context = media.matches ? probe.getContext('webgl2') : null
+      setDesktopAvailable(!!context)
+      context?.getExtension('WEBGL_lose_context')?.loseContext()
+    }
+    update()
+    media.addEventListener('change', update)
+    return () => media.removeEventListener('change', update)
+  }, [])
 
   useEffect(() => {
-    function onUnityMessage(event: MessageEvent) {
-      if (event.origin !== window.location.origin || event.source !== frameRef.current?.contentWindow) return
-      const message = parseSelection(event.data)
-      if (!data || !message || message.data.tour_key !== data.tour.key) return
-      const available = data.rooms.some((room) =>
-        room.points.some((item) => item.key === message.data.point_key),
-      )
-      if (!available || (point === message.data.point_key && !element)) return
+    if (!instance || !data) return
+    const query = new URLSearchParams({ tour: data.tour.key })
+    if (validPoint) query.set('point', point!)
+    if (validPoint && element) query.set('element', element)
+    instance.SendMessage('MuseumBlockout', 'ApplySelection', query.toString())
+  }, [instance, data, point, element, validPoint])
+
+  useEffect(() => {
+    function onSelection(event: Event) {
+      const cleared = parseClearedSelection((event as CustomEvent<unknown>).detail)
+      if (data && instance && cleared?.data.tour_key === data.tour.key) {
+        setParams((current) => {
+          const next = new URLSearchParams(current)
+          next.delete('point'); next.delete('element')
+          return next.toString() === current.toString() ? current : next
+        }, { replace: true })
+        return
+      }
+      const message = parseSelection((event as CustomEvent<unknown>).detail)
+      if (!data || !instance || !message) return
+      const selection = confirmedSelection(data, message)
+      if (!selection) return
       setParams((current) => {
         const next = new URLSearchParams(current)
-        next.set('point', message.data.point_key)
-        next.delete('element')
-        return next
+        next.set('tour', selection.get('tour')!)
+        next.set('point', selection.get('point')!)
+        if (selection.has('element')) next.set('element', selection.get('element')!)
+        else next.delete('element')
+        return next.toString() === current.toString() ? current : next
       }, { replace: true })
     }
-    window.addEventListener('message', onUnityMessage)
-    return () => window.removeEventListener('message', onUnityMessage)
-  }, [data, point, element, setParams])
+    window.addEventListener('musiyo:selection', onSelection)
+    return () => window.removeEventListener('musiyo:selection', onSelection)
+  }, [data, instance, setParams])
 
   return <section className="page">
     <p className="eyebrow">Experiencia / recorrido</p>
     <h1>Recorrido virtual</h1>
-    <p className="page-intro">La API define qué salas, puntos y elementos autorizados están disponibles.</p>
+    <p className="page-intro">Explora libremente las salas. La ruta sugerida dura unos 30 minutos; puedes detenerte en cada pieza y elegir tu propio camino.</p>
     <Status loading={loading} error={error} />
     {data && <>
-      <div className="recorrido-meta"><span>Contrato v{data.schema_version}</span><span>{data.rooms.length} sala{data.rooms.length === 1 ? '' : 's'}</span></div>
       {point && !validPoint && <p className="status error" role="alert">El punto o elemento solicitado no está disponible.</p>}
-      {!desktopAvailable && <p className="status">En este dispositivo puedes explorar <Link to="/recorrido/texto">el recorrido en texto</Link>.</p>}
-      {desktopAvailable && (frameSrc ? <iframe ref={frameRef} title="Recorrido Unity" className="unity-frame" src={frameSrc} allowFullScreen /> :
-        <div className="walkthrough-placeholder"><span aria-hidden="true">◎</span><h2>Recorrido no disponible</h2><p>Puedes explorar la alternativa en texto mientras se prepara la visita 3D.</p></div>)}
-      <p><Link className="button secondary" to="/recorrido/texto">Explorar el recorrido en texto</Link></p>
+      {desktopAvailable ? <UnityTour onReady={setInstance} /> : <p className="status">Puedes explorar <Link to="/recorrido/texto">el recorrido en texto</Link>. La visita 3D requiere un computador con WebGL 2.</p>}
       <div className="room-list">{data.rooms.map((room) => <article key={room.key}>
-        <span className="section-num">Sala {room.order + 1}</span>
-        <h2>{room.name}</h2>
+        <span className="section-num">Sala {room.order + 1}</span><h2>{room.name}</h2>
         <ul>{room.points.map((item) => <li key={item.key}>
-          <Link reloadDocument to={'/recorrido?point=' + encodeURIComponent(item.key)}>{item.name}</Link>
+          <Link to={'/recorrido?point=' + encodeURIComponent(item.key)}>{item.name}</Link>
           <span>{item.elements.length} elementos disponibles</span>
         </li>)}</ul>
       </article>)}</div>
-      {point && validPoint && data.rooms.flatMap((room) => room.points)
-        .filter((item) => item.key === point)
-        .flatMap((item) => item.elements)
-        .map((item) => <p key={item.slug}><Link to={'/elementos/' + encodeURIComponent(item.slug)}>Abrir ficha: {item.title} ↗</Link></p>)}
+      {validPoint && element && <div id="selected-element" className="tour-detail"><Detail elementId={element} /></div>}
     </>}
   </section>
 }
 
 function TextTour() {
   const tourKey = import.meta.env.VITE_TOUR_KEY || 'museum-main'
-  const { data, error, loading } = useApi((signal) => api.tour(tourKey, signal), tourKey)
+  const load = useCallback((signal: AbortSignal) => api.tour(tourKey, signal), [tourKey])
+  const { data, error, loading } = useApi(load)
   return <section className="page text-tour">
     <p className="eyebrow">Experiencia / recorrido en texto</p>
     <h1>Explora el museo</h1>

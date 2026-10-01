@@ -1,4 +1,8 @@
 // Generated from contracts/openapi.json by scripts/generate-contracts.mjs.
+export interface ClearedSelectionData {
+  tour_key: string
+}
+
 export interface Community {
   name: string
   people: string
@@ -104,6 +108,13 @@ export interface Room {
   short_description?: string
   ambient_audio_resource_id?: string | null
   points: (Point)[]
+}
+
+export interface SelectionCleared {
+  source: "musiyo-unity"
+  type: "selection_cleared"
+  version: 1
+  data: ClearedSelectionData
 }
 
 export interface SelectionConfirmed {
