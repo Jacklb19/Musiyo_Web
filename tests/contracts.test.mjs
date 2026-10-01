@@ -1,9 +1,18 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
-import { parseCatalog, parseFacets, parseElement, parseResourceAccess, parseSelection, parseTour } from '../src/contract-validation.ts'
+import { parseCatalog, parseFacets, parseElement, parseResourceAccess, parseSelection, parseTour, parseValidatorSession } from '../src/contract-validation.ts'
 
 const example = (name) => JSON.parse(readFileSync(new URL('../contracts/examples/' + name, import.meta.url)))
+
+test('validator sessions require consistent authentication and account metadata', () => {
+  const session = example('validator_session.json')
+  assert.equal(parseValidatorSession(session).authenticated, true)
+  for (const patch of [{ schema_version: true }, { user: null }, { csrf_token: null }, { authenticated: false }]) {
+    assert.throws(() => parseValidatorSession({ ...session, ...patch }))
+  }
+  assert.equal(parseValidatorSession({ schema_version:1, authenticated:false, user:null, csrf_token:null }).authenticated, false)
+})
 
 test('temporary resource access rejects future versions and unsafe URLs', () => {
   const access = example('resource_access.json')
