@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Link, NavLink, Route, Routes, useParams, useSearchParams } from 'react-router-dom'
+import { Link, NavLink, Route, Routes, useSearchParams } from 'react-router-dom'
 import { api } from './api'
 import { parseSelection, parseClearedSelection } from './contract-validation'
 import { UnityTour, type UnityInstance } from './UnityTour'
 import { confirmedSelection, isAvailableSelection } from './tour-selection'
 import { useApi } from './use-api'
 import { Catalog } from './Catalog'
+import { Detail } from './Detail'
 
 function Status({ loading, error }: { loading: boolean; error: string }) {
   if (loading) return <output className="status">Cargando contenido autorizado…</output>
@@ -34,34 +35,6 @@ function Home() {
       </section>
     </>
   )
-}
-
-function Detail({ elementId }: { elementId?: string } = {}) {
-  const { id: routeId = '' } = useParams()
-  const id = elementId || routeId
-  const load = useCallback((signal: AbortSignal) => api.element(id, signal), [id])
-  const { data, error, loading } = useApi(load)
-  const blockLabels = { documented_fact: 'Información documentada', testimony: 'Testimonio', interpretation: 'Interpretación' }
-  return <section className="page">
-    <Link className="back" to="/catalogo">← Volver al catálogo</Link>
-    <Status loading={loading} error={error} />
-    {data && <article className="ficha">
-      <p className="eyebrow">Archivo / ficha</p><h1>{data.title}</h1><p className="lead">{data.description}</p>
-      {(data.blocks || []).map((block) => <section key={block.id}><h2>{blockLabels[block.kind]}</h2><p>{block.text}</p>{block.attribution && <p>{block.attribution}</p>}{block.context && <p>{block.context}</p>}</section>)}
-      {!!data.sources?.length && <section><h2>Fuentes</h2>{data.sources.map((source) => <p key={source.id}>{source.reference}</p>)}</section>}
-      {!!data.credits?.length && <section><h2>Créditos</h2>{data.credits.map((credit, index) => <p key={index}>{credit.role ? credit.role + ': ' : ''}{credit.name}</p>)}</section>}
-      {!!data.restrictions?.length && <section><h2>Restricciones de uso</h2>{data.restrictions.map((restriction, index) => <p key={index}>{restriction.description}</p>)}</section>}
-
-      {!!data.resources?.some((resource) => resource.kind === 'narration') && <section id="narrations">
-        <h2>Narraciones y transcripciones</h2>
-        {data.resources.filter((resource) => resource.kind === 'narration').map((resource) => <details key={resource.id}>
-          <summary>Leer transcripción{resource.duration_seconds ? ` · ${Math.round(resource.duration_seconds)} segundos` : ''}</summary>
-          <p>{resource.transcription || 'La transcripción no está disponible.'}</p>
-          {resource.credit && <p>Crédito: {resource.credit}</p>}
-        </details>)}
-      </section>}
-    </article>}
-  </section>
 }
 
 function TourPage() {
