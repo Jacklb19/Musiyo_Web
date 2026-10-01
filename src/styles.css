@@ -67,3 +67,12 @@ input:focus-visible,a:focus-visible{outline:3px solid #a96543;outline-offset:3px
 footer{display:flex;justify-content:space-between;gap:20px;padding:30px clamp(24px,5vw,88px);background:#172c29;color:#d4decf;font-size:12px}
 @media(max-width:800px){.site-header{height:auto;min-height:76px;flex-wrap:wrap;gap:12px;padding-top:14px;padding-bottom:14px}nav{gap:18px}.hero{grid-template-columns:1fr}.hero-art{min-height:330px}.hero-copy{padding:70px 28px}.intro-grid{grid-template-columns:1fr}footer{flex-direction:column}}
 @media(max-width:520px){.brand-sub{display:none}.hero h1{font-size:58px}.page{padding-top:50px}.room-list li{flex-direction:column;gap:4px}}
+
+.skip-link{position:fixed;top:12px;left:12px;z-index:1000;padding:14px;background:#172c29;color:white;transform:translateY(-150%)}
+.skip-link:focus{transform:translateY(0)}
+.room-index{display:flex;flex-wrap:wrap;gap:16px;margin:24px 0 40px}
+.room-index a,.text-room a,.ficha a{text-decoration:underline;text-underline-offset:4px}
+.text-room{border-top:1px solid #cbd2c5;padding:30px 0;scroll-margin-top:24px;max-width:900px}
+.text-room h2{font-size:36px}.text-room h3{font-size:22px}.text-room li{margin:20px 0}.text-room p{line-height:1.65}
+summary{cursor:pointer;font-weight:600;padding:12px 0}summary:focus-visible,button:focus-visible{outline:3px solid #a96543;outline-offset:3px}
+footer nav{font-size:12px;flex-wrap:wrap;gap:20px}footer nav a{color:#d4decf}
