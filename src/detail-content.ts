@@ -1,0 +1,22 @@
+import type { Element, Resource, TextBlock } from './contracts'
+
+export function safeSourceUrl(value: string | null | undefined): string | null {
+  if (!value) return null
+  try {
+    const url = new URL(value)
+    return ['http:', 'https:'].includes(url.protocol) ? url.href : null
+  } catch { return null }
+}
+
+export function groupedBlocks(element: Element): Array<{ kind: TextBlock['kind']; title: string; blocks: TextBlock[] }> {
+  return [
+    { kind: 'documented_fact' as const, title: 'Lo documentado' },
+    { kind: 'testimony' as const, title: 'Testimonios' },
+    { kind: 'interpretation' as const, title: 'Interpretaciones' },
+  ].map((group) => ({ ...group, blocks: (element.blocks || []).filter((block) => block.kind === group.kind) }))
+    .filter((group) => group.blocks.length > 0)
+}
+
+export function subtitlesFor(resource: Resource, resources: Resource[]): Resource | null {
+  return resources.find((item) => item.id === resource.subtitles_resource_id && item.kind === 'subtitles' && item.mime === 'text/vtt') || null
+}
