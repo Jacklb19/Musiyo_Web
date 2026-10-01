@@ -98,7 +98,7 @@ export interface Problem {
   type: string
   title: string
   status: number
-  code: "not_found" | "schema_incompatible" | "validation"
+  code: "not_found" | "schema_incompatible" | "validation" | "service_unavailable"
   detail: string
 }
 
@@ -114,6 +114,15 @@ export interface Resource {
   variants?: (ResourceVariant)[]
   transcription?: string | null
   subtitles_resource_id?: string | null
+}
+
+export interface ResourceAccess {
+  schema_version: 1
+  url: string
+  expires_at: string
+  mime: string
+  byte_count?: number | null
+  sha256?: string | null
 }
 
 export interface ResourceVariant {

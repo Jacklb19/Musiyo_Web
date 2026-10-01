@@ -4,7 +4,8 @@ import bridgeSchema from '../contracts/bridge.v1.schema.json' with { type: 'json
 import clearedSchema from '../contracts/bridge-clear.v1.schema.json' with { type: 'json' }
 import catalogSchema from '../contracts/catalog.v1.schema.json' with { type: 'json' }
 import facetSchema from '../contracts/catalog-facet.v1.schema.json' with { type: 'json' }
-import type { CatalogFacet, CatalogPage, Element, SelectionConfirmed, SelectionCleared, Tour } from './contracts.ts'
+import accessSchema from '../contracts/resource-access.v1.schema.json' with { type: 'json' }
+import type { CatalogFacet, CatalogPage, Element, ResourceAccess, SelectionConfirmed, SelectionCleared, Tour } from './contracts.ts'
 
 type Schema = {
   $ref?: string
@@ -115,4 +116,13 @@ export function parseFacets(value: unknown): CatalogFacet[] {
   if (!Array.isArray(value) || !value.every((item) => matches(item, facetSchema as Schema, facetSchema as Schema)) ||
       new Set(value.map((item: CatalogFacet) => item.slug)).size !== value.length) throw new Error('Filtros incompatibles')
   return value as CatalogFacet[]
+}
+
+export function parseResourceAccess(value: unknown): ResourceAccess {
+  if (!matches(value, accessSchema as Schema, accessSchema as Schema)) throw new Error('Acceso a recurso incompatible')
+  const access = value as ResourceAccess
+  let url: URL
+  try { url = new URL(access.url, 'https://api.invalid') } catch { throw new Error('URL de recurso incompatible') }
+  if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password) throw new Error('URL de recurso incompatible')
+  return access
 }
