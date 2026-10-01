@@ -7,6 +7,8 @@ import { confirmedSelection, isAvailableSelection } from './tour-selection'
 import { useApi } from './use-api'
 import { Catalog } from './Catalog'
 import { Detail } from './Detail'
+import { Validator } from './Validator'
+import { ValidatorSessionProvider } from './validator-session'
 
 function Status({ loading, error }: { loading: boolean; error: string }) {
   if (loading) return <output className="status">Cargando contenido autorizado…</output>
@@ -172,5 +174,5 @@ function NotFound() {
 }
 
 export default function App() {
-  return <div className="site-shell"><header className="site-header"><Link className="brand" to="/" aria-label="Musiyo, ir al inicio"><span className="brand-mark">M</span><span>musiyo<span className="brand-sub"> Bëtsknaté</span></span></Link><nav aria-label="Navegación principal"><NavLink to="/" end>Inicio</NavLink><NavLink to="/catalogo">Catálogo</NavLink><NavLink to="/recorrido">Recorrido</NavLink></nav></header><a className="skip-link" href="#main-content">Saltar al contenido</a><main id="main-content" tabIndex={-1}><Routes><Route path="/" element={<Home />} /><Route path="/catalogo" element={<Catalog />} /><Route path="/elementos/:id" element={<Detail />} /><Route path="/recorrido" element={<TourPage />} /><Route path="/recorrido/texto" element={<TextTour />} /><Route path="/acerca" element={<About />} /><Route path="/privacidad" element={<Privacy />} /><Route path="*" element={<NotFound />} /></Routes></main><footer><span>Musiyo Bëtsknaté</span><nav aria-label="Información del museo"><Link to="/acerca">Acerca</Link><Link to="/privacidad">Privacidad</Link><Link to="/recorrido/texto">Recorrido en texto</Link></nav></footer></div>
+  return <ValidatorSessionProvider><div className="site-shell"><header className="site-header"><Link className="brand" to="/" aria-label="Musiyo, ir al inicio"><span className="brand-mark">M</span><span>musiyo<span className="brand-sub"> Bëtsknaté</span></span></Link><nav aria-label="Navegación principal"><NavLink to="/" end>Inicio</NavLink><NavLink to="/catalogo">Catálogo</NavLink><NavLink to="/recorrido">Recorrido</NavLink></nav></header><a className="skip-link" href="#main-content">Saltar al contenido</a><main id="main-content" tabIndex={-1}><Routes><Route path="/" element={<Home />} /><Route path="/catalogo" element={<Catalog />} /><Route path="/elementos/:id" element={<Detail />} /><Route path="/recorrido" element={<TourPage />} /><Route path="/recorrido/texto" element={<TextTour />} /><Route path="/acerca" element={<About />} /><Route path="/privacidad" element={<Privacy />} /><Route path="/validador" element={<Validator />} /><Route path="/validador/:id" element={<Validator />} /><Route path="*" element={<NotFound />} /></Routes></main><footer><span>Musiyo Bëtsknaté</span><nav aria-label="Información del museo"><Link to="/validador">Validadores</Link><Link to="/acerca">Acerca</Link><Link to="/privacidad">Privacidad</Link><Link to="/recorrido/texto">Recorrido en texto</Link></nav></footer></div></ValidatorSessionProvider>
 }

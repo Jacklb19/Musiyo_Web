@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { api } from './api'
+import { useValidatorSession } from './validator-session'
 import { groupedBlocks, safeSourceUrl, subtitlesFor } from './detail-content'
 import { useApi } from './use-api'
 import type { Resource } from './contracts'
@@ -15,6 +16,7 @@ function RecordedAudio({ element, title, resource, downloadRestricted }: { eleme
 }
 
 export function Detail({ elementId }: { elementId?: string } = {}) {
+  const { session } = useValidatorSession()
   const { id: routeId = '' } = useParams()
   const id = elementId || routeId
   const [attempt, setAttempt] = useState(0)
@@ -38,6 +40,7 @@ export function Detail({ elementId }: { elementId?: string } = {}) {
     {loading && <output className="status">Cargando ficha…</output>}
     {error && <p className="status error" role="alert">{error} <button type="button" onClick={() => setAttempt((value) => value + 1)}>Reintentar</button></p>}
     {data && <article className="ficha">
+      {session?.authenticated && <Link className="button secondary" to={'/validador/' + encodeURIComponent(data.slug)}>Corregir ficha</Link>}
       <p className="eyebrow">Archivo / ficha</p><h1>{data.title}</h1>
       <dl className="detail-metadata">
         {data.community && <><dt>Comunidad</dt><dd>{data.community.name} · {({ kamentsa: 'Pueblo Kamëntsá', inga: 'Pueblo Inga', shared: 'Participación compartida' } as Record<string, string>)[data.community.people] || data.community.people}</dd></>}
