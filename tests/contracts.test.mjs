@@ -1,9 +1,18 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
-import { parseCatalog, parseFacets, parseElement, parseSelection, parseTour } from '../src/contract-validation.ts'
+import { parseCatalog, parseFacets, parseElement, parseResourceAccess, parseSelection, parseTour } from '../src/contract-validation.ts'
 
 const example = (name) => JSON.parse(readFileSync(new URL('../contracts/examples/' + name, import.meta.url)))
+
+test('temporary resource access rejects future versions and unsafe URLs', () => {
+  const access = example('resource_access.json')
+  assert.equal(parseResourceAccess(access).mime, 'audio/wav')
+  for (const patch of [{ schema_version: true }, { schema_version: 2 }, { expires_at: 'invalid' },
+    { url: 'javascript:alert(1)' }, { url: 'https://user:password@example.test' }, { sha256: 'invalid' }]) {
+    assert.throws(() => parseResourceAccess({ ...access, ...patch }))
+  }
+})
 
 test('catalog pages reject incompatible versions, impossible counts and duplicate entries', () => {
   const page = example('catalog.json')

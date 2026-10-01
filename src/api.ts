@@ -1,9 +1,9 @@
-import { parseCatalog, parseFacets, parseElement, parseTour } from './contract-validation'
+import { parseCatalog, parseFacets, parseElement, parseTour, parseResourceAccess } from './contract-validation'
 
 const base = (import.meta.env.VITE_API_BASE_URL || '/api/v1').replace(/\/$/, '')
 
-async function get<T>(path: string, signal?: AbortSignal): Promise<T> {
-  const response = await fetch(base + path, { signal })
+async function get<T>(path: string, signal?: AbortSignal, method = 'GET'): Promise<T> {
+  const response = await fetch(base + path, { signal, method })
   if (!response.ok) {
     throw new Error(response.status === 404 ? 'Contenido no disponible' : 'No fue posible consultar la API')
   }
@@ -11,6 +11,7 @@ async function get<T>(path: string, signal?: AbortSignal): Promise<T> {
 }
 
 export const api = {
+  resourceAccess: async (resource: string, signal?: AbortSignal) => parseResourceAccess(await get<unknown>('/resources/' + encodeURIComponent(resource) + '/access?schema_version=1', signal, 'POST')),
   resourceUrl: (element: string, resource: string) => `${base}/elements/${encodeURIComponent(element)}/resources/${encodeURIComponent(resource)}`,
   catalog: async (params: URLSearchParams, signal?: AbortSignal) => parseCatalog(await get<unknown>('/catalog?' + params.toString(), signal)),
   categories: async (signal?: AbortSignal) => parseFacets(await get<unknown>('/categories', signal)),
