@@ -1,4 +1,29 @@
 // Generated from contracts/openapi.json by scripts/generate-contracts.mjs.
+export interface CatalogFacet {
+  slug: string
+  name: string
+  element_count: number
+}
+
+export interface CatalogItem {
+  slug: string
+  title: string
+  community?: string | null
+  thumbnail_resource_id?: string | null
+  has_3d_model?: boolean
+  has_narration?: boolean
+  description: string
+  category?: NamedTerm | null
+}
+
+export interface CatalogPage {
+  schema_version: 1
+  items: (CatalogItem)[]
+  total: number
+  limit: number
+  offset: number
+}
+
 export interface ClearedSelectionData {
   tour_key: string
 }

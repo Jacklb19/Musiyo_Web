@@ -2,7 +2,9 @@ import tourSchema from '../contracts/tour.v1.schema.json' with { type: 'json' }
 import elementSchema from '../contracts/element.v1.schema.json' with { type: 'json' }
 import bridgeSchema from '../contracts/bridge.v1.schema.json' with { type: 'json' }
 import clearedSchema from '../contracts/bridge-clear.v1.schema.json' with { type: 'json' }
-import type { Element, SelectionConfirmed, SelectionCleared, Tour } from './contracts.ts'
+import catalogSchema from '../contracts/catalog.v1.schema.json' with { type: 'json' }
+import facetSchema from '../contracts/catalog-facet.v1.schema.json' with { type: 'json' }
+import type { CatalogFacet, CatalogPage, Element, SelectionConfirmed, SelectionCleared, Tour } from './contracts.ts'
 
 type Schema = {
   $ref?: string
@@ -19,6 +21,7 @@ type Schema = {
   uniqueItems?: boolean
   minLength?: number
   minimum?: number
+  maximum?: number
   pattern?: string
   format?: string
 }
@@ -48,9 +51,9 @@ function matches(value: unknown, schema: Schema, root: Schema): boolean {
         (!schema.pattern || new RegExp(schema.pattern).test(value)) &&
         (schema.format !== 'date-time' || !Number.isNaN(Date.parse(value)))
     case 'integer':
-      return typeof value === 'number' && Number.isInteger(value) && value >= (schema.minimum ?? -Infinity)
+      return typeof value === 'number' && Number.isSafeInteger(value) && value >= (schema.minimum ?? -Infinity) && value <= (schema.maximum ?? Infinity)
     case 'number':
-      return typeof value === 'number' && Number.isFinite(value) && value >= (schema.minimum ?? -Infinity)
+      return typeof value === 'number' && Number.isFinite(value) && value >= (schema.minimum ?? -Infinity) && value <= (schema.maximum ?? Infinity)
     case 'boolean': return typeof value === 'boolean'
     default: throw new Error('Unsupported contract schema vocabulary')
   }
@@ -98,4 +101,18 @@ export function parseSelection(value: unknown): SelectionConfirmed | null {
 
 export function parseClearedSelection(value: unknown): SelectionCleared | null {
   return matches(value, clearedSchema as Schema, clearedSchema as Schema) ? value as SelectionCleared : null
+}
+
+export function parseCatalog(value: unknown): CatalogPage {
+  if (!matches(value, catalogSchema as Schema, catalogSchema as Schema)) throw new Error('Catálogo incompatible')
+  const page = value as CatalogPage
+  if (new Set(page.items.map((item) => item.slug)).size !== page.items.length || page.items.length > page.limit ||
+      page.items.length > Math.max(0, page.total - page.offset)) throw new Error('Paginación de catálogo incompatible')
+  return page
+}
+
+export function parseFacets(value: unknown): CatalogFacet[] {
+  if (!Array.isArray(value) || !value.every((item) => matches(item, facetSchema as Schema, facetSchema as Schema)) ||
+      new Set(value.map((item: CatalogFacet) => item.slug)).size !== value.length) throw new Error('Filtros incompatibles')
+  return value as CatalogFacet[]
 }
