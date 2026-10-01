@@ -1,0 +1,3 @@
+contracts/** text eol=lf
+src/contracts.ts text eol=lf
+scripts/*.mjs text eol=lf
