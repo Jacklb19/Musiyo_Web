@@ -14,4 +14,4 @@ React y TypeScript para catálogo, fichas, recorrido libre y alternativa accesib
 
 `npm.cmd run lint`, `npm.cmd run typecheck`, `npm.cmd test`, `npm.cmd run contracts:check` y `npm.cmd run build` comprueban código, selecciones, contratos y compilación. En producción, sirve `/api/v1` bajo el mismo origen. Configuración en `.env.example`.
 
-El guía por voz, la edición autenticada y el visor de modelos remotos siguen pendientes. Los repositorios no contienen material cultural ni claves.
+La ficha carga modelos GLB bajo demanda con acceso temporal a la variante Web y controles de rotación, zoom y restablecimiento. Los decodificadores Draco se sirven localmente y se preparan al iniciar o compilar. El validador dispone de ingreso y corrección de textos. El guía por voz sigue pendiente. Los repositorios no contienen material cultural ni claves.
