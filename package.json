@@ -12,9 +12,12 @@
     "contracts:check": "node scripts/generate-contracts.mjs --check",
     "test": "node --test tests/*.test.mjs",
     "lint": "oxlint src vite.config.ts --deny-warnings",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "predev": "node scripts/sync-model-decoders.mjs",
+    "prebuild": "node scripts/sync-model-decoders.mjs"
   },
   "dependencies": {
+    "@google/model-viewer": "4.3.1",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "react-router-dom": "^7.18.4"

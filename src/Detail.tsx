@@ -5,6 +5,7 @@ import { useValidatorSession } from './validator-session'
 import { groupedBlocks, safeSourceUrl, subtitlesFor } from './detail-content'
 import { useApi } from './use-api'
 import type { Resource } from './contracts'
+import { ModelSection } from './ModelSection'
 
 function RecordedAudio({ element, title, resource, downloadRestricted }: { element: string; title: string; resource: Resource; downloadRestricted: boolean }) {
   if (!resource.transcription) return <p>La transcripción de este audio no está disponible.</p>
@@ -31,6 +32,7 @@ export function Detail({ elementId }: { elementId?: string } = {}) {
   const point = tour.data?.rooms.flatMap((room) => room.points).find((candidate) => candidate.elements.some((item) => item.slug === id))
   const tourQuery = new URLSearchParams({ tour: tourKey, point: point?.key || '', element: id })
   const resources = data?.resources || []
+  const models = resources.filter((resource) => resource.kind === 'model_3d')
   const images = resources.filter((resource) => resource.kind === 'image')
   const recordings = resources.filter((resource) => ['audio', 'narration', 'video'].includes(resource.kind))
   const downloadRestricted = data?.restrictions?.some((restriction) => restriction.kind === 'no_download') || false
@@ -58,6 +60,7 @@ export function Detail({ elementId }: { elementId?: string } = {}) {
           {source && <p className="block-source">Fuente: {source.reference}</p>}
         </div>
       })}</section>)}
+      {models.map((resource, index) => <ModelSection key={id + resource.id} resource={resource} title={data.title} index={index} />)}
       {!!images.length && <section><h2>Imágenes</h2>{images.map((resource) => <figure key={resource.id}>
         <img className="detail-image" src={api.resourceUrl(id, resource.id)} alt={resource.alternative_text || 'Imagen de ' + data.title} loading="lazy" />
         <figcaption>{resource.credit && <span>Crédito: {resource.credit}</span>}{resource.provenance && <span>Procedencia: {resource.provenance}</span>}</figcaption>
