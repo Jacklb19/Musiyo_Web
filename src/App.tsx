@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Link, NavLink, Route, Routes, useSearchParams } from 'react-router-dom'
+import { Link, NavLink, Route, Routes, useNavigate, useSearchParams } from 'react-router-dom'
 import { api } from './api'
-import { parseSelection, parseClearedSelection } from './contract-validation'
+import { parseSelection, parseClearedSelection, parseReturnToCatalog } from './contract-validation'
 import { UnityTour, type UnityInstance } from './UnityTour'
 import { confirmedSelection, isAvailableSelection } from './tour-selection'
 import { useApi } from './use-api'
@@ -49,6 +49,17 @@ function TourPage() {
   const validPoint = !!data && isAvailableSelection(data, point, element)
   const [instance, setInstance] = useState<UnityInstance | null>(null)
   const [desktopAvailable, setDesktopAvailable] = useState(false)
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    // Unity only asks; the page performs the navigation at the end of the suggested route.
+    function onNavigation(event: Event) {
+      const message = parseReturnToCatalog((event as CustomEvent<unknown>).detail)
+      if (data && instance && message?.data.tour_key === data.tour.key) navigate('/catalogo')
+    }
+    window.addEventListener('musiyo:navigation', onNavigation)
+    return () => window.removeEventListener('musiyo:navigation', onNavigation)
+  }, [data, instance, navigate])
 
   useEffect(() => {
     const media = window.matchMedia('(min-width: 1024px) and (pointer: fine)')

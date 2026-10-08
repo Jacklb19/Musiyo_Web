@@ -2,11 +2,12 @@ import tourSchema from '../contracts/tour.v1.schema.json' with { type: 'json' }
 import elementSchema from '../contracts/element.v1.schema.json' with { type: 'json' }
 import bridgeSchema from '../contracts/bridge.v1.schema.json' with { type: 'json' }
 import clearedSchema from '../contracts/bridge-clear.v1.schema.json' with { type: 'json' }
+import returnSchema from '../contracts/bridge-return.v1.schema.json' with { type: 'json' }
 import catalogSchema from '../contracts/catalog.v1.schema.json' with { type: 'json' }
 import facetSchema from '../contracts/catalog-facet.v1.schema.json' with { type: 'json' }
 import accessSchema from '../contracts/resource-access.v1.schema.json' with { type: 'json' }
 import sessionSchema from '../contracts/validator-session.v1.schema.json' with { type: 'json' }
-import type { CatalogFacet, CatalogPage, Element, ResourceAccess, SelectionConfirmed, SelectionCleared, Tour, ValidatorSession } from './contracts.ts'
+import type { CatalogFacet, CatalogPage, Element, ResourceAccess, ReturnToCatalog, SelectionConfirmed, SelectionCleared, Tour, ValidatorSession } from './contracts.ts'
 
 type Schema = {
   $ref?: string
@@ -107,6 +108,10 @@ export function parseSelection(value: unknown): SelectionConfirmed | null {
 
 export function parseClearedSelection(value: unknown): SelectionCleared | null {
   return matches(value, clearedSchema as Schema, clearedSchema as Schema) ? value as SelectionCleared : null
+}
+
+export function parseReturnToCatalog(value: unknown): ReturnToCatalog | null {
+  return matches(value, returnSchema as Schema, returnSchema as Schema) ? value as ReturnToCatalog : null
 }
 
 export function parseCatalog(value: unknown): CatalogPage {
