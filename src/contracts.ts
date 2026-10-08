@@ -151,6 +151,13 @@ export interface Restriction {
   description: string
 }
 
+export interface ReturnToCatalog {
+  source: "musiyo-unity"
+  type: "return_to_catalog"
+  version: 1
+  data: ClearedSelectionData
+}
+
 export interface Room {
   key: string
   name: string

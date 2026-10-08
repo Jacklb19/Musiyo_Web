@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import { confirmedSelection, isAvailableSelection } from '../src/tour-selection.ts'
-import { parseSelection, parseClearedSelection, parseTour } from '../src/contract-validation.ts'
+import { parseSelection, parseClearedSelection, parseReturnToCatalog, parseTour } from '../src/contract-validation.ts'
 
 const tour = parseTour(JSON.parse(readFileSync(new URL('../contracts/examples/tour_full.json', import.meta.url))))
 const points = tour.rooms.flatMap(room => room.points)
@@ -34,4 +34,13 @@ test('closing a panel uses a distinct versioned message without stale point fiel
   assert.equal(parseSelection(message), null)
   message.data.point_key = point.key
   assert.equal(parseClearedSelection(message), null)
+})
+
+test('returning to the catalogue is a distinct versioned request that never carries a selection', () => {
+  const message = JSON.parse(readFileSync(new URL('../contracts/examples/return_to_catalog.json', import.meta.url)))
+  assert.equal(parseReturnToCatalog(message).data.tour_key, 'museum-main')
+  assert.equal(parseClearedSelection(message), null)
+  assert.equal(parseSelection(message), null)
+  assert.equal(parseReturnToCatalog({ ...message, version: '1' }), null)
+  assert.equal(parseReturnToCatalog({ ...message, data: { tour_key: 'museum-main', point_key: point.key } }), null)
 })
