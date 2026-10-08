@@ -1,9 +1,45 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
-import { parseElement, parseSelection, parseTour } from '../src/contract-validation.ts'
+import { parseCatalog, parseFacets, parseElement, parseResourceAccess, parseSelection, parseTour, parseValidatorSession } from '../src/contract-validation.ts'
 
 const example = (name) => JSON.parse(readFileSync(new URL('../contracts/examples/' + name, import.meta.url)))
+
+test('validator sessions require consistent authentication and account metadata', () => {
+  const session = example('validator_session.json')
+  assert.equal(parseValidatorSession(session).authenticated, true)
+  for (const patch of [{ schema_version: true }, { user: null }, { csrf_token: null }, { authenticated: false }]) {
+    assert.throws(() => parseValidatorSession({ ...session, ...patch }))
+  }
+  assert.equal(parseValidatorSession({ schema_version:1, authenticated:false, user:null, csrf_token:null }).authenticated, false)
+})
+
+test('temporary resource access rejects future versions and unsafe URLs', () => {
+  const access = example('resource_access.json')
+  assert.equal(parseResourceAccess(access).mime, 'audio/wav')
+  for (const patch of [{ schema_version: true }, { schema_version: 2 }, { expires_at: 'invalid' },
+    { url: 'javascript:alert(1)' }, { url: 'https://user:password@example.test' }, { sha256: 'invalid' }]) {
+    assert.throws(() => parseResourceAccess({ ...access, ...patch }))
+  }
+})
+
+test('catalog pages reject incompatible versions, impossible counts and duplicate entries', () => {
+  const page = example('catalog.json')
+  assert.equal(parseCatalog(page).items[0].slug, 'synthetic-item')
+  for (const patch of [{ schema_version: true }, { schema_version: 2 }, { total: 0 }, { limit: 101 },
+    { offset: -1 }, { items: [...page.items, ...page.items], total: 2 }]) {
+    assert.throws(() => parseCatalog({ ...page, ...patch }))
+  }
+  assert.deepEqual(parseCatalog({ ...page, items: [], total: 0 }).items, [])
+})
+
+test('public facet counts must be positive and keys unique', () => {
+  const facet = { slug: 'test', name: 'Prueba', element_count: 1 }
+  assert.equal(parseFacets([facet]).length, 1)
+  for (const value of [[{ ...facet, element_count: 0 }], [facet, facet], null, [{ ...facet, private: true }]]) {
+    assert.throws(() => parseFacets(value))
+  }
+})
 
 test('shared examples allow an empty point and one element at two points', () => {
   const tour = parseTour(example('tour_full.json'))

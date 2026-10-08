@@ -1,25 +1,21 @@
 # Musiyo Web
 
-Frontend React + TypeScript para el catálogo público de Musiyo Bëtsknaté y la entrada al recorrido virtual. Consulta datos desde Musiyo API; el navegador solo presenta las fichas que la API autoriza.
+React y TypeScript para catálogo, fichas, recorrido libre y alternativa accesible en texto. El contenido procede de Musiyo API.
 
-## Inicio local
+## Desarrollo local
 
-1. Instalar Node.js 24 y npm (las pruebas usan su soporte TypeScript).
-2. Ejecutar `npm.cmd install` y `npm.cmd run dev`.
-3. Iniciar Musiyo API en `http://127.0.0.1:8000`; Vite envía `/api` a ese servidor durante desarrollo.
+- Node.js 24: `npm.cmd ci` y `npm.cmd run dev`.
+- Inicia la API en `http://127.0.0.1:8000`; Vite conecta `/api` al servicio local. Para otro puerto, configura `MUSIYO_DEV_API_TARGET=http://127.0.0.1:8002` en `.env.local` y reinicia Vite; el navegador sigue usando `/api/v1` del mismo origen.
+- Genera el museo con `Musiyo > Build Museum Web` en Unity y ejecuta `npm.cmd run unity:sync`. Los archivos generados permanecen ignorados.
+- Abre `/recorrido`. Las consultas `point` y `element` seleccionan anclas y fichas disponibles; `VITE_TOUR_KEY` elige el recorrido. El cargador utiliza `/unity/unity-build.json` bajo el mismo origen.
+- Celulares y equipos sin WebGL 2 disponen de `/recorrido/texto`. También existen `/acerca` y `/privacidad`.
 
-`npm.cmd run build` verifica TypeScript y genera `dist/`. En producción se debe dirigir `/api/v1` a la API bajo el mismo origen o establecer `VITE_API_BASE_URL` en el build. Ver `.env.example`.
+## Verificación
 
-## Estado funcional
+`npm.cmd run lint`, `npm.cmd run typecheck`, `npm.cmd test`, `npm.cmd run contracts:check` y `npm.cmd run build` comprueban código, selecciones, contratos y compilación. En producción, sirve `/api/v1` bajo el mismo origen. Configuración en `.env.example`.
 
-- Inicio, catálogo con búsqueda local sobre fichas públicas, detalle y estados vacíos.
-- Vista de recorrido que consulta el contrato v1 en inglés; abre Unity en el punto solicitado y refleja en la URL la selección hecha con Tab.
-- `npm.cmd run unity:sync` copia el build Unity local a `public/unity/`. La carpeta generada está ignorada por Git. `VITE_UNITY_WEBGL_URL` permite cambiar su ruta, siempre bajo el mismo origen.
+La ficha carga modelos GLB bajo demanda con acceso temporal a la variante Web y controles de rotación, zoom y restablecimiento. Los decodificadores Draco se sirven localmente y se preparan al iniciar o compilar. El validador dispone de ingreso y corrección de textos. El guía por voz sigue pendiente. Los repositorios no contienen material cultural ni claves.
 
-`npm.cmd run contracts:check` verifica tipos generados y copias SHA-256; `npm.cmd test` valida ejemplos y mensajes v1. La selección de elementos, el cargador Unity en el mismo documento (T-36) y la edición autenticada siguen pendientes. No se incluyen contenidos culturales de ejemplo.
+## Coordinación
 
-En PowerShell de este equipo, usa `npm.cmd`: el comando `npm` se está resolviendo hacia una instalación global incompleta.
-
-## Probar recorrido local
-
-Con la API iniciada y el recorrido sintético creado con `python -m app.seed`, genera el WebGL desde Unity y ejecuta `npm.cmd run unity:sync`. Abre `/recorrido?point=punto-02` en la web; Unity debe enfocar ese punto. Con `Tab` en Unity, la URL web debe mostrar el nuevo punto. El contrato y los archivos se consultan bajo el mismo origen.
+Código y contratos en inglés; interfaz en español. El contenido y los recursos proceden de API; parámetros y estilos ajustables se centralizan en configuración. Figma es referencia visual, mientras Unity gobierna la visita y sus menús. Narraciones Studio, guía RAG y validación física Quest son tareas pendientes. Ramas `codex/`, commits por tarea y sin push por agentes. En el checkout local, consulta `AGENTS.md` y `.local_docs/REPORT_2026-10-08_HANDOFF.md`; estas notas y el preview externo no se incluyen en Git.

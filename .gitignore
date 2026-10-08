@@ -23,3 +23,6 @@ Thumbs.db
 # Solo README.md se versiona como documento Markdown
 *.[mM][dD]
 !/README.md
+
+# Generated local model decoders
+/public/model-decoders/

@@ -10,9 +10,14 @@
     "unity:sync": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/sync-unity.ps1",
     "contracts:generate": "node scripts/generate-contracts.mjs",
     "contracts:check": "node scripts/generate-contracts.mjs --check",
-    "test": "node --test tests/*.test.mjs"
+    "test": "node --test tests/*.test.mjs",
+    "lint": "oxlint src vite.config.ts --deny-warnings",
+    "typecheck": "tsc --noEmit",
+    "predev": "node scripts/sync-model-decoders.mjs",
+    "prebuild": "node scripts/sync-model-decoders.mjs"
   },
   "dependencies": {
+    "@google/model-viewer": "4.3.1",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "react-router-dom": "^7.18.4"
@@ -21,6 +26,7 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.1",
+    "oxlint": "1.86.0",
     "typescript": "^7.0.2",
     "vite": "^8.3.1"
   }
