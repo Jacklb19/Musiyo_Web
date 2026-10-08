@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Link, NavLink, Route, Routes, useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, NavLink, Route, Routes, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { api } from './api'
 import { parseSelection, parseClearedSelection, parseReturnToCatalog } from './contract-validation'
 import { UnityTour, type UnityInstance } from './UnityTour'
@@ -9,44 +9,26 @@ import { Catalog } from './Catalog'
 import { Detail } from './Detail'
 import { Validator } from './Validator'
 import { ValidatorSessionProvider } from './validator-session'
+import { Home } from './Home'
+import { copy } from './interface-copy'
+import { presentation } from './presentation-config'
 
 function Status({ loading, error }: { loading: boolean; error: string }) {
-  if (loading) return <output className="status">Cargando contenido autorizado…</output>
+  if (loading) return <output className="status">{copy.common.loading}</output>
   if (error) return <p className="status error" role="alert">{error}</p>
   return null
 }
 
-function Home() {
-  return (
-    <>
-      <section className="hero">
-        <div className="hero-copy">
-          <p className="eyebrow">Museo virtual · prototipo técnico</p>
-          <h1>Musiyo <em>Bëtsknaté</em></h1>
-          <p className="lead">Un espacio digital en construcción para consultar contenidos culturales validados y recorrer salas virtuales.</p>
-          <div className="actions">
-            <Link className="button primary" to="/catalogo">Explorar catálogo <span aria-hidden="true">↗</span></Link>
-            <Link className="button secondary" to="/recorrido">Ver recorrido <span aria-hidden="true">→</span></Link>
-          </div>
-        </div>
-        <div className="hero-art" aria-hidden="true"><div className="orbit orbit-one" /><div className="orbit orbit-two" /><div className="center-mark">M</div></div>
-      </section>
-      <section className="intro-grid" aria-label="Secciones">
-        <article><span className="section-num">01 / Archivo</span><h2>Catálogo</h2><p>Las fichas aparecen cuando cuentan con aprobación cultural y autorización vigente.</p><Link to="/catalogo">Abrir catálogo <span aria-hidden="true">↗</span></Link></article>
-        <article><span className="section-num">02 / Experiencia</span><h2>Recorrido</h2><p>La estructura de salas y puntos se consulta desde la API con identificadores compartidos con Unity.</p><Link to="/recorrido">Abrir recorrido <span aria-hidden="true">↗</span></Link></article>
-      </section>
-    </>
-  )
-}
-
 function TourPage() {
-  const tourKey = import.meta.env.VITE_TOUR_KEY || 'museum-main'
-  const load = useCallback((signal: AbortSignal) => api.tour(tourKey, signal), [tourKey])
+  const tourKey = presentation.tourKey
+  const [attempt, setAttempt] = useState(0)
+  const load = useCallback((signal: AbortSignal) => { void attempt; return api.tour(tourKey, signal) }, [tourKey, attempt])
   const { data, error, loading } = useApi(load)
   const [params, setParams] = useSearchParams()
   const point = params.get('point')
   const element = params.get('element')
   const validPoint = !!data && isAvailableSelection(data, point, element)
+  const selectedPoint = validPoint ? data?.rooms.flatMap(room => room.points).find(item => item.key === point) : null
   const [instance, setInstance] = useState<UnityInstance | null>(null)
   const [desktopAvailable, setDesktopAvailable] = useState(false)
   const navigate = useNavigate()
@@ -110,38 +92,46 @@ function TourPage() {
     return () => window.removeEventListener('musiyo:selection', onSelection)
   }, [data, instance, setParams])
 
-  return <section className="page">
-    <p className="eyebrow">Experiencia / recorrido</p>
-    <h1>Recorrido virtual</h1>
-    <p className="page-intro">Explora libremente las salas. La ruta sugerida dura unos 30 minutos; puedes detenerte en cada pieza y elegir tu propio camino.</p>
-    <Status loading={loading} error={error} />
+  return <section className="page tour-page">
+    <div className="section-heading"><div><p className="eyebrow">{copy.tour.eyebrow}</p>
+    <h1>{copy.tour.title}</h1><p className="page-intro">{copy.tour.intro}</p></div><Link className="button secondary" to="/catalogo">{copy.tour.catalog} <span aria-hidden="true">↗</span></Link></div>
+    <Status loading={loading} error="" />
+    {error && <p className="status error" role="alert">{error} <button type="button" onClick={() => setAttempt(value => value + 1)}>{copy.common.retry}</button></p>}
     {data && <>
-      {point && !validPoint && <p className="status error" role="alert">El punto o elemento solicitado no está disponible.</p>}
-      {desktopAvailable ? <UnityTour onReady={setInstance} /> : <p className="status">Puedes explorar <Link to="/recorrido/texto">el recorrido en texto</Link>. La visita 3D requiere un computador con WebGL 2.</p>}
+      {point && !validPoint && <p className="status error" role="alert">{copy.tour.unavailable}</p>}
+      {desktopAvailable ? <UnityTour onReady={setInstance} /> : <div className="tour-alternative"><p>{copy.tour.mobile}</p><Link className="button primary" to="/recorrido/texto">{copy.tour.text} <span aria-hidden="true">→</span></Link></div>}
+      {selectedPoint && <section className="point-selection" aria-labelledby="point-selection-title"><p className="eyebrow">{copy.tour.selection}</p><h2 id="point-selection-title">{selectedPoint.name}</h2><label>{copy.tour.choose}<select value={element || ''} onChange={event => setParams(current => {
+        const next = new URLSearchParams(current)
+        if (event.target.value) next.set('element', event.target.value)
+        else next.delete('element')
+        return next
+      })}><option value="">{copy.tour.choose}</option>{selectedPoint.elements.map(item => <option key={item.slug} value={item.slug}>{item.title}</option>)}</select></label>
+      {element ? <Link className="button secondary" to={'/elementos/' + encodeURIComponent(element)}>{copy.tour.openDetail} <span aria-hidden="true">↗</span></Link> : <p>{copy.tour.noSelection}</p>}</section>}
+      {validPoint && element && <div id="selected-element" className="tour-detail"><Detail elementId={element} /></div>}
+      <div className="section-heading room-heading"><div><h2>{copy.tour.rooms}</h2><p>{copy.tour.roomHint}</p></div><Link to="/recorrido/texto">{copy.tour.text} <span aria-hidden="true">→</span></Link></div>
       <div className="room-list">{data.rooms.map((room) => <article key={room.key}>
-        <span className="section-num">Sala {room.order + 1}</span><h2>{room.name}</h2>
+        <span className="section-num">{copy.tour.room} {String(room.order + 1).padStart(2, '0')}</span><h3>{room.name}</h3>
         <ul>{room.points.map((item) => <li key={item.key}>
           <Link to={'/recorrido?point=' + encodeURIComponent(item.key)}>{item.name}</Link>
-          <span>{item.elements.length} elementos disponibles</span>
+          <span>{copy.tour.count(item.elements.length)}</span>
         </li>)}</ul>
       </article>)}</div>
-      {validPoint && element && <div id="selected-element" className="tour-detail"><Detail elementId={element} /></div>}
     </>}
   </section>
 }
 
 function TextTour() {
-  const tourKey = import.meta.env.VITE_TOUR_KEY || 'museum-main'
-  const load = useCallback((signal: AbortSignal) => api.tour(tourKey, signal), [tourKey])
+  const tourKey = presentation.tourKey
+  const [attempt, setAttempt] = useState(0)
+  const load = useCallback((signal: AbortSignal) => { void attempt; return api.tour(tourKey, signal) }, [tourKey, attempt])
   const { data, error, loading } = useApi(load)
   return <section className="page text-tour">
-    <p className="eyebrow">Experiencia / recorrido en texto</p>
-    <h1>Explora el museo</h1>
-    <p className="page-intro">Recorre las salas a tu ritmo y en el orden que prefieras. La ruta sugerida dura aproximadamente 30 minutos. Las fichas ofrecen los textos y transcripciones disponibles.</p>
-    <Link className="back" to="/recorrido">Abrir recorrido 3D</Link>
-    <Status loading={loading} error={error} />
+    <p className="eyebrow">{copy.tour.textEyebrow}</p><h1>{copy.tour.textTitle}</h1>
+    <p className="page-intro">{copy.tour.textIntro}</p><Link className="back" to="/catalogo">{copy.common.backCatalog}</Link>
+    <Status loading={loading} error="" />
+    {error && <p className="status error" role="alert">{error} <button type="button" onClick={() => setAttempt(value => value + 1)}>{copy.common.retry}</button></p>}
     {data && <>
-      <nav aria-label="Salas del recorrido" className="room-index">
+      <nav aria-label={copy.tour.roomNavigation} className="room-index">
         {data.rooms.map((room, index) => <a key={room.key} href={'#room-' + index}>{room.name}</a>)}
       </nav>
       {data.rooms.map((room, index) => <section key={room.key} id={'room-' + index} className="text-room" aria-labelledby={'room-title-' + index}>
@@ -151,10 +141,10 @@ function TextTour() {
           <h3>{point.name}</h3>
           {point.elements.length ? <ul>{point.elements.map((element) => <li key={element.slug}>
             <Link to={'/elementos/' + encodeURIComponent(element.slug)}>{element.title}</Link>
-            {element.has_narration && <> · <Link to={'/elementos/' + encodeURIComponent(element.slug) + '#narrations'}>Leer narración</Link></>}
-          </li>)}</ul> : <p>No hay contenido disponible en este punto.</p>}
+            {element.has_narration && <> · <Link to={'/elementos/' + encodeURIComponent(element.slug) + '#narrations'}>{copy.tour.readNarration}</Link></>}
+          </li>)}</ul> : <p>{copy.tour.noContent}</p>}
         </li>)}</ol>
-        <a href="#main-content">Volver al comienzo</a>
+        <a href="#main-content">{copy.tour.top}</a>
       </section>)}
     </>}
   </section>
@@ -165,7 +155,7 @@ function About() {
     <div className="ficha"><p className="lead">Un museo virtual para explorar contenidos sobre el Carnaval del Perdón del Valle de Sibundoy.</p>
       <section><h2>Una visita libre</h2><p>Puedes elegir tu propio camino, volver a una sala y consultar las fichas. La ruta sugerida pasa por Llegada, Bienvenida, Personajes, Instrumentos y Danza, Fogón y Mirador.</p></section>
       <section><h2>Fuentes y créditos</h2><p>Cada ficha presenta sus fuentes, créditos y restricciones disponibles. Los testimonios, la información documentada y las interpretaciones se muestran por separado. Las referencias a los pueblos Kamëntsá e Inga conservan su identificación propia.</p></section>
-      <section><h2>Formas de explorar</h2><p>El catálogo y las fichas pueden consultarse en computador y celular. El recorrido 3D está previsto para computador y Meta Quest; <Link to="/recorrido/texto">la alternativa en texto</Link> permite explorar las salas sin cargar el entorno 3D.</p></section>
+      <section><h2>Formas de explorar</h2><p>El catálogo y las fichas pueden consultarse en computador y celular. El recorrido 3D requiere un computador con WebGL 2; <Link to="/recorrido/texto">la alternativa en texto</Link> permite explorar las salas sin cargar el entorno 3D.</p></section>
     </div>
   </section>
 }
@@ -185,5 +175,19 @@ function NotFound() {
 }
 
 export default function App() {
-  return <ValidatorSessionProvider><div className="site-shell"><header className="site-header"><Link className="brand" to="/" aria-label="Musiyo, ir al inicio"><span className="brand-mark">M</span><span>musiyo<span className="brand-sub"> Bëtsknaté</span></span></Link><nav aria-label="Navegación principal"><NavLink to="/" end>Inicio</NavLink><NavLink to="/catalogo">Catálogo</NavLink><NavLink to="/recorrido">Recorrido</NavLink></nav></header><a className="skip-link" href="#main-content">Saltar al contenido</a><main id="main-content" tabIndex={-1}><Routes><Route path="/" element={<Home />} /><Route path="/catalogo" element={<Catalog />} /><Route path="/elementos/:id" element={<Detail />} /><Route path="/recorrido" element={<TourPage />} /><Route path="/recorrido/texto" element={<TextTour />} /><Route path="/acerca" element={<About />} /><Route path="/privacidad" element={<Privacy />} /><Route path="/validador" element={<Validator />} /><Route path="/validador/:id" element={<Validator />} /><Route path="*" element={<NotFound />} /></Routes></main><footer><span>Musiyo Bëtsknaté</span><nav aria-label="Información del museo"><Link to="/validador">Validadores</Link><Link to="/acerca">Acerca</Link><Link to="/privacidad">Privacidad</Link><Link to="/recorrido/texto">Recorrido en texto</Link></nav></footer></div></ValidatorSessionProvider>
+  const location = useLocation()
+  useEffect(() => {
+    if (!location.hash) {
+      window.scrollTo(0, 0)
+      document.getElementById('main-content')?.focus({ preventScroll: true })
+    }
+  }, [location.pathname, location.hash])
+  return <ValidatorSessionProvider><div className="site-shell" data-tone={location.pathname === '/' ? 'dark' : 'light'}>
+    <a className="skip-link" href="#main-content">{copy.site.skip}</a>
+    <header className="site-header"><Link className="brand" to="/"><span className="brand-mark" aria-hidden="true">MB</span><span>{copy.site.name}<span className="brand-sub">{copy.site.subtitle}</span></span></Link>
+      <nav aria-label={copy.site.navigation}><NavLink to="/" end>{copy.site.home}</NavLink><NavLink to="/catalogo">{copy.site.catalog}</NavLink><NavLink to="/recorrido">{copy.site.tour}</NavLink></nav>
+    </header>
+    <main id="main-content" tabIndex={-1}><Routes><Route path="/" element={<Home />} /><Route path="/catalogo" element={<Catalog />} /><Route path="/elementos/:id" element={<Detail />} /><Route path="/recorrido" element={<TourPage />} /><Route path="/recorrido/texto" element={<TextTour />} /><Route path="/acerca" element={<About />} /><Route path="/privacidad" element={<Privacy />} /><Route path="/validador" element={<Validator />} /><Route path="/validador/:id" element={<Validator />} /><Route path="*" element={<NotFound />} /></Routes></main>
+    <footer><div><span className="footer-brand">{copy.site.name}</span><p>{copy.site.subtitle}</p></div><nav aria-label={copy.site.information}><Link to="/validador">{copy.site.validators}</Link><Link to="/acerca">{copy.site.about}</Link><Link to="/privacidad">{copy.site.privacy}</Link><Link to="/recorrido/texto">{copy.home.textTour}</Link></nav></footer>
+  </div></ValidatorSessionProvider>
 }

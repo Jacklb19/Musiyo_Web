@@ -1,0 +1,26 @@
+:root {
+  --color-background: #f6efe4;
+  --color-surface: #fffbf5;
+  --color-ink: #1b1420;
+  --color-muted: #6b5e57;
+  --color-border: #e4d8c6;
+  --color-gold: #e3a83b;
+  --color-gold-hover: #efbd60;
+  --color-accent: #a43525;
+  --color-tour: #120a0d;
+  --color-positive: #245b47;
+  --color-positive-surface: #e7efe9;
+  --color-error: #852c22;
+  --color-error-surface: #f8e5df;
+  --color-dark-text: #f6efe4;
+  --color-dark-muted: #cfc1b9;
+  --color-dark-border: #51414b;
+  --font-body: 'DM Sans', system-ui, sans-serif;
+  --font-display: 'Fraunces', Georgia, serif;
+  --radius-card: 24px;
+  --radius-control: 12px;
+  --radius-pill: 999px;
+  --space-page: clamp(24px, 4.45vw, 64px);
+  --width-page: 1440px;
+  --shadow-card: 0 6px 16px #341f1010;
+}
