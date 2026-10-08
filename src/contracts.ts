@@ -1,4 +1,33 @@
 // Generated from contracts/openapi.json by scripts/generate-contracts.mjs.
+export interface CatalogFacet {
+  slug: string
+  name: string
+  element_count: number
+}
+
+export interface CatalogItem {
+  slug: string
+  title: string
+  community?: string | null
+  thumbnail_resource_id?: string | null
+  has_3d_model?: boolean
+  has_narration?: boolean
+  description: string
+  category?: NamedTerm | null
+}
+
+export interface CatalogPage {
+  schema_version: 1
+  items: (CatalogItem)[]
+  total: number
+  limit: number
+  offset: number
+}
+
+export interface ClearedSelectionData {
+  tour_key: string
+}
+
 export interface Community {
   name: string
   people: string
@@ -7,6 +36,12 @@ export interface Community {
 export interface Credit {
   role?: string | null
   name: string
+}
+
+export interface DetailCorrection {
+  title?: string | null
+  description?: string | null
+  interpretations?: (InterpretationCorrection)[]
 }
 
 export interface Element {
@@ -47,9 +82,19 @@ export interface Health {
   status: "ok"
 }
 
+export interface InterpretationCorrection {
+  block_id: string
+  text: string
+}
+
 export interface LastModified {
   date: string
   author: string
+}
+
+export interface LoginRequest {
+  username: string
+  password: string
 }
 
 export interface NamedTerm {
@@ -69,7 +114,7 @@ export interface Problem {
   type: string
   title: string
   status: number
-  code: "not_found" | "schema_incompatible" | "validation"
+  code: "not_found" | "schema_incompatible" | "validation" | "service_unavailable" | "unauthenticated" | "forbidden" | "rate_limited"
   detail: string
 }
 
@@ -87,6 +132,15 @@ export interface Resource {
   subtitles_resource_id?: string | null
 }
 
+export interface ResourceAccess {
+  schema_version: 1
+  url: string
+  expires_at: string
+  mime: string
+  byte_count?: number | null
+  sha256?: string | null
+}
+
 export interface ResourceVariant {
   id: string
   profile: "web" | "quest"
@@ -97,6 +151,13 @@ export interface Restriction {
   description: string
 }
 
+export interface ReturnToCatalog {
+  source: "musiyo-unity"
+  type: "return_to_catalog"
+  version: 1
+  data: ClearedSelectionData
+}
+
 export interface Room {
   key: string
   name: string
@@ -104,6 +165,13 @@ export interface Room {
   short_description?: string
   ambient_audio_resource_id?: string | null
   points: (Point)[]
+}
+
+export interface SelectionCleared {
+  source: "musiyo-unity"
+  type: "selection_cleared"
+  version: 1
+  data: ClearedSelectionData
 }
 
 export interface SelectionConfirmed {
@@ -146,4 +214,16 @@ export interface TourMetadata {
   key: string
   name: string
   revision?: string | null
+}
+
+export interface ValidatorProfile {
+  username: string
+  name: string
+}
+
+export interface ValidatorSession {
+  schema_version: 1
+  authenticated: boolean
+  user?: ValidatorProfile | null
+  csrf_token?: string | null
 }
