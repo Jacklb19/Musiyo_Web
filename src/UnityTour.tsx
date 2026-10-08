@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { copy } from './interface-copy'
 
 export interface UnityInstance {
   SendMessage(object: string, method: string, value: string): void
@@ -99,10 +100,10 @@ export function UnityTour({ onReady }: { onReady: (instance: UnityInstance | nul
   }, [attempt, onReady])
 
   return <div className="unity-host">
-    {!loaded && !error && <output>Preparando recorrido… <progress max={100} value={progress}>{progress}%</progress></output>}
+    {!loaded && !error && <output className="unity-loading"><span className="eyebrow">{copy.site.name}</span><span>{copy.tour.loading}</span><progress max={100} value={progress} aria-label={copy.tour.loading}>{progress}%</progress><span>{progress}%</span></output>}
     {error && <div role="alert"><p>{error}</p><button className="button secondary" onClick={() => {
       setError(''); setProgress(0); setLoaded(false); setAttempt(attempt + 1)
-    }}>Reintentar</button></div>}
+    }}>{copy.common.retry}</button></div>}
     <canvas id="museum-unity-canvas" ref={canvas} className="unity-canvas" tabIndex={0}
       onFocus={() => { keyboardNavigation.current = true }}
       onBlur={() => { keyboardNavigation.current = false }}
@@ -111,8 +112,8 @@ export function UnityTour({ onReady }: { onReady: (instance: UnityInstance | nul
         else if (keyboardNavigation.current && !event.ctrlKey && !event.altKey && !event.metaKey
           && ['Tab', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(event.key)) event.preventDefault()
       }}
-      aria-label="Recorrido virtual. WASD o flechas para caminar; IJKL para mirar; Tab para puntos; Enter para activar; Escape para pausa y liberar el teclado." hidden={!loaded || !!error} />
-    {loaded && <p>WASD o flechas: caminar · IJKL: mirar · Tab: puntos · Enter: activar · Esc: pausa. Para volver a los controles de la página, pulsa Esc y después Tab.</p>}
-    <p><Link to="/recorrido/texto">Explorar el recorrido en texto</Link></p>
+      aria-label={copy.tour.canvasLabel} hidden={!loaded || !!error} />
+    {loaded && <details className="tour-controls"><summary>{copy.tour.controlsTitle}</summary><p>{copy.tour.controls}</p></details>}
+    <p><Link to="/recorrido/texto">{copy.tour.text}</Link></p>
   </div>
 }

@@ -1,4 +1,5 @@
 import type { Element, Resource, TextBlock } from './contracts'
+import { copy } from './interface-copy.ts'
 
 export function safeSourceUrl(value: string | null | undefined): string | null {
   if (!value) return null
@@ -10,9 +11,9 @@ export function safeSourceUrl(value: string | null | undefined): string | null {
 
 export function groupedBlocks(element: Element): Array<{ kind: TextBlock['kind']; title: string; blocks: TextBlock[] }> {
   return [
-    { kind: 'documented_fact' as const, title: 'Lo documentado' },
-    { kind: 'testimony' as const, title: 'Testimonios' },
-    { kind: 'interpretation' as const, title: 'Interpretaciones' },
+    { kind: 'documented_fact' as const, title: copy.detail.documented },
+    { kind: 'testimony' as const, title: copy.detail.testimony },
+    { kind: 'interpretation' as const, title: copy.detail.interpretation },
   ].map((group) => ({ ...group, blocks: (element.blocks || []).filter((block) => block.kind === group.kind) }))
     .filter((group) => group.blocks.length > 0)
 }
