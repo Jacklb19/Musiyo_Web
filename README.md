@@ -5,7 +5,7 @@ React y TypeScript para catálogo, fichas, recorrido libre y alternativa accesib
 ## Desarrollo local
 
 - Node.js 24: `npm.cmd ci` y `npm.cmd run dev`.
-- Inicia la API en `http://127.0.0.1:8000`; Vite conecta `/api` al servicio local.
+- Inicia la API en `http://127.0.0.1:8000`; Vite conecta `/api` al servicio local. Para otro puerto, configura `MUSIYO_DEV_API_TARGET=http://127.0.0.1:8002` en `.env.local` y reinicia Vite; el navegador sigue usando `/api/v1` del mismo origen.
 - Genera el museo con `Musiyo > Build Museum Web` en Unity y ejecuta `npm.cmd run unity:sync`. Los archivos generados permanecen ignorados.
 - Abre `/recorrido`. Las consultas `point` y `element` seleccionan anclas y fichas disponibles; `VITE_TOUR_KEY` elige el recorrido. El cargador utiliza `/unity/unity-build.json` bajo el mismo origen.
 - Celulares y equipos sin WebGL 2 disponen de `/recorrido/texto`. También existen `/acerca` y `/privacidad`.
