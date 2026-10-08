@@ -2,17 +2,20 @@ import { useState } from 'react'
 import type { Resource } from './contracts'
 import { ModelViewer } from './ModelViewer'
 import { webModelResourceId } from './model-controls'
+import { copy } from './interface-copy'
 
-export function ModelSection({ resource, title, index }: { resource: Resource; title: string; index: number }) {
+export function ModelSection({ resource, title, index, embedded = false }: { resource: Resource; title: string; index: number; embedded?: boolean }) {
   const [open, setOpen] = useState(false)
   const available = !!webModelResourceId(resource)
+  const Heading = embedded ? 'h3' : 'h2'
   return <section className="model-section">
-    <h2>Modelo 3D {index + 1}</h2>
-    {!available ? <p>No hay una variante de este modelo disponible para la Web.</p> : <>
-      <button className="button secondary" type="button" aria-expanded={open} onClick={() => setOpen((value) => !value)}>{open ? 'Cerrar modelo 3D' : 'Ver modelo 3D'}</button>
+    <Heading>{copy.common.model} {index + 1}</Heading>
+    {!available ? <p>{copy.common.noWebModel}</p> : <>
+      {!open && <div className="model-placeholder"><span aria-hidden="true">3D</span><p>{copy.detail.viewHelp}</p></div>}
+      <button className="button primary" type="button" aria-expanded={open} onClick={() => setOpen((value) => !value)}>{open ? copy.common.closeModel : copy.common.inspect}</button>
       {open && <ModelViewer resource={resource} title={title} />}
     </>}
-    {resource.credit && <p>Crédito: {resource.credit}</p>}
-    {resource.provenance && <p>Procedencia: {resource.provenance}</p>}
+    {resource.credit && <p>{copy.common.credit}: {resource.credit}</p>}
+    {resource.provenance && <p>{copy.common.provenance}: {resource.provenance}</p>}
   </section>
 }
