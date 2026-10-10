@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
-import { confirmedSelection, isAvailableSelection } from '../src/tour-selection.ts'
-import { parseSelection, parseClearedSelection, parseReturnToCatalog, parseTour } from '../src/contract-validation.ts'
+import { confirmedSelection, isAvailableSelection, presenceForSelection } from '../src/tour-selection.ts'
+import { parseSelection, parseClearedSelection, parsePointPresence, parseReturnToCatalog, parseTour } from '../src/contract-validation.ts'
 
 const tour = parseTour(JSON.parse(readFileSync(new URL('../contracts/examples/tour_full.json', import.meta.url))))
 const points = tour.rooms.flatMap(room => room.points)
@@ -43,4 +43,22 @@ test('returning to the catalogue is a distinct versioned request that never carr
   assert.equal(parseSelection(message), null)
   assert.equal(parseReturnToCatalog({ ...message, version: '1' }), null)
   assert.equal(parseReturnToCatalog({ ...message, data: { tour_key: 'museum-main', point_key: point.key } }), null)
+})
+
+test('point presence is a distinct versioned message that follows the shown point', () => {
+  const message = JSON.parse(readFileSync(new URL('../contracts/examples/point_presence.json', import.meta.url)))
+  const parsed = parsePointPresence(message)
+  assert.ok(parsed)
+  assert.equal(parseSelection(message), null)
+  assert.equal(parseClearedSelection(message), null)
+  assert.equal(parsePointPresence({ ...message, data: { ...message.data, presence: 'nearby' } }), null)
+  assert.equal(parsePointPresence({ ...message, version: '1' }), null)
+  assert.equal(parsePointPresence({ ...message, data: { ...message.data, distance: 3 } }), null)
+  const { tour_key, point_key } = message.data
+  assert.equal(presenceForSelection(parsed, tour_key, point_key), 'away')
+  const withoutElement = parsePointPresence({ ...message, data: { ...message.data, element_slug: null, presence: 'near' } })
+  assert.equal(presenceForSelection(withoutElement, tour_key, point_key), 'near', 'Presence is kept while another element of the point is chosen.')
+  assert.equal(presenceForSelection(parsed, tour_key, 'other-point'), null)
+  assert.equal(presenceForSelection(parsed, tour_key, null), null)
+  assert.equal(presenceForSelection(parsed, 'other-tour', point_key), null)
 })

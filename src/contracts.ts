@@ -110,6 +110,20 @@ export interface Point {
   elements: (ElementSummary)[]
 }
 
+export interface PointPresence {
+  source: "musiyo-unity"
+  type: "point_presence"
+  version: 1
+  data: PresenceData
+}
+
+export interface PresenceData {
+  tour_key: string
+  point_key: string
+  element_slug?: string | null
+  presence: "near" | "away"
+}
+
 export interface Problem {
   type: string
   title: string
