@@ -19,6 +19,8 @@ const cleared = JSON.parse(readFileSync(path('contracts/bridge-clear.v1.schema.j
 Object.assign(schemas, cleared.$defs, { SelectionCleared: cleared })
 const returned = JSON.parse(readFileSync(path('contracts/bridge-return.v1.schema.json'), 'utf8'))
 Object.assign(schemas, returned.$defs, { ReturnToCatalog: returned })
+const presence = JSON.parse(readFileSync(path('contracts/bridge-presence.v1.schema.json'), 'utf8'))
+Object.assign(schemas, presence.$defs, { PointPresence: presence })
 const names = Object.keys(schemas).filter((name) => !['HTTPValidationError', 'ValidationError'].includes(name)).sort()
 const typeOf = (property) => {
   if (property.$ref) return property.$ref.split('/').at(-1)

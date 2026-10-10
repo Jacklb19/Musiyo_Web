@@ -3,11 +3,12 @@ import elementSchema from '../contracts/element.v1.schema.json' with { type: 'js
 import bridgeSchema from '../contracts/bridge.v1.schema.json' with { type: 'json' }
 import clearedSchema from '../contracts/bridge-clear.v1.schema.json' with { type: 'json' }
 import returnSchema from '../contracts/bridge-return.v1.schema.json' with { type: 'json' }
+import presenceSchema from '../contracts/bridge-presence.v1.schema.json' with { type: 'json' }
 import catalogSchema from '../contracts/catalog.v1.schema.json' with { type: 'json' }
 import facetSchema from '../contracts/catalog-facet.v1.schema.json' with { type: 'json' }
 import accessSchema from '../contracts/resource-access.v1.schema.json' with { type: 'json' }
 import sessionSchema from '../contracts/validator-session.v1.schema.json' with { type: 'json' }
-import type { CatalogFacet, CatalogPage, Element, ResourceAccess, ReturnToCatalog, SelectionConfirmed, SelectionCleared, Tour, ValidatorSession } from './contracts.ts'
+import type { CatalogFacet, CatalogPage, Element, PointPresence, ResourceAccess, ReturnToCatalog, SelectionConfirmed, SelectionCleared, Tour, ValidatorSession } from './contracts.ts'
 
 type Schema = {
   $ref?: string
@@ -112,6 +113,10 @@ export function parseClearedSelection(value: unknown): SelectionCleared | null {
 
 export function parseReturnToCatalog(value: unknown): ReturnToCatalog | null {
   return matches(value, returnSchema as Schema, returnSchema as Schema) ? value as ReturnToCatalog : null
+}
+
+export function parsePointPresence(value: unknown): PointPresence | null {
+  return matches(value, presenceSchema as Schema, presenceSchema as Schema) ? value as PointPresence : null
 }
 
 export function parseCatalog(value: unknown): CatalogPage {
