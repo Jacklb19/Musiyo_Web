@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, NavLink, Route, Routes, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { api } from './api'
-import { parseSelection, parseClearedSelection, parseReturnToCatalog } from './contract-validation'
+import { parseSelection, parseClearedSelection, parsePointPresence, parseReturnToCatalog } from './contract-validation'
 import { UnityTour, type UnityInstance } from './UnityTour'
-import { confirmedSelection, isAvailableSelection } from './tour-selection'
+import { confirmedSelection, isAvailableSelection, presenceForSelection } from './tour-selection'
 import { useApi } from './use-api'
+import type { PointPresence } from './contracts'
 import { Catalog } from './Catalog'
 import { Detail } from './Detail'
 import { Validator } from './Validator'
@@ -29,9 +30,33 @@ function TourPage() {
   const element = params.get('element')
   const validPoint = !!data && isAvailableSelection(data, point, element)
   const selectedPoint = validPoint ? data?.rooms.flatMap(room => room.points).find(item => item.key === point) : null
+  const selectedElement = element ? selectedPoint?.elements.find(item => item.slug === element) : null
   const [instance, setInstance] = useState<UnityInstance | null>(null)
   const [desktopAvailable, setDesktopAvailable] = useState(false)
   const navigate = useNavigate()
+  // The last report is kept as received and matched while rendering: Unity can send it before the
+  // address shows the point it describes. Unity only reports changes and every activated point starts
+  // near, so a report about another point is dropped as soon as the shown point changes.
+  const [report, setReport] = useState<PointPresence | null>(null)
+  const [reportedPoint, setReportedPoint] = useState(point)
+  if (reportedPoint !== point) {
+    setReportedPoint(point)
+    if (report && report.data.point_key !== point) setReport(null)
+  }
+  const away = !!data && !!report && presenceForSelection(report, data.tour.key, validPoint ? point : null) === 'away'
+  const onEngine = useCallback((engine: UnityInstance | null) => {
+    setInstance(engine)
+    if (!engine) setReport(null)
+  }, [])
+
+  useEffect(() => {
+    function onPresence(event: Event) {
+      const message = parsePointPresence((event as CustomEvent<unknown>).detail)
+      if (data && instance && message?.data.tour_key === data.tour.key) setReport(message)
+    }
+    window.addEventListener('musiyo:presence', onPresence)
+    return () => window.removeEventListener('musiyo:presence', onPresence)
+  }, [data, instance])
 
   useEffect(() => {
     // Unity only asks; the page performs the navigation at the end of the suggested route.
@@ -68,6 +93,7 @@ function TourPage() {
     function onSelection(event: Event) {
       const cleared = parseClearedSelection((event as CustomEvent<unknown>).detail)
       if (data && instance && cleared?.data.tour_key === data.tour.key) {
+        setReport(null)
         setParams((current) => {
           const next = new URLSearchParams(current)
           next.delete('point'); next.delete('element')
@@ -99,15 +125,16 @@ function TourPage() {
     {error && <p className="status error" role="alert">{error} <button type="button" onClick={() => setAttempt(value => value + 1)}>{copy.common.retry}</button></p>}
     {data && <>
       {point && !validPoint && <p className="status error" role="alert">{copy.tour.unavailable}</p>}
-      {desktopAvailable ? <UnityTour onReady={setInstance} /> : <div className="tour-alternative"><p>{copy.tour.mobile}</p><Link className="button primary" to="/recorrido/texto">{copy.tour.text} <span aria-hidden="true">→</span></Link></div>}
+      {desktopAvailable ? <UnityTour onReady={onEngine} /> : <div className="tour-alternative"><p>{copy.tour.mobile}</p><Link className="button primary" to="/recorrido/texto">{copy.tour.text} <span aria-hidden="true">→</span></Link></div>}
       {selectedPoint && <section className="point-selection" aria-labelledby="point-selection-title"><p className="eyebrow">{copy.tour.selection}</p><h2 id="point-selection-title">{selectedPoint.name}</h2><label>{copy.tour.choose}<select value={element || ''} onChange={event => setParams(current => {
         const next = new URLSearchParams(current)
         if (event.target.value) next.set('element', event.target.value)
         else next.delete('element')
         return next
       })}><option value="">{copy.tour.choose}</option>{selectedPoint.elements.map(item => <option key={item.slug} value={item.slug}>{item.title}</option>)}</select></label>
-      {element ? <Link className="button secondary" to={'/elementos/' + encodeURIComponent(element)}>{copy.tour.openDetail} <span aria-hidden="true">↗</span></Link> : <p>{copy.tour.noSelection}</p>}</section>}
-      {validPoint && element && <div id="selected-element" className="tour-detail"><Detail elementId={element} /></div>}
+      {element ? <Link className="button secondary" to={'/elementos/' + encodeURIComponent(element)}>{copy.tour.openDetail} <span aria-hidden="true">↗</span></Link> : <p>{copy.tour.noSelection}</p>}
+      <output className="point-presence">{away ? (selectedElement?.has_narration ? copy.tour.awayNarrated : copy.tour.away) : ''}</output></section>}
+      {validPoint && element && <div className="tour-detail"><Detail elementId={element} /></div>}
       <div className="section-heading room-heading"><div><h2>{copy.tour.rooms}</h2><p>{copy.tour.roomHint}</p></div><Link to="/recorrido/texto">{copy.tour.text} <span aria-hidden="true">→</span></Link></div>
       <div className="room-list">{data.rooms.map((room) => <article key={room.key}>
         <span className="section-num">{copy.tour.room} {String(room.order + 1).padStart(2, '0')}</span><h3>{room.name}</h3>

@@ -178,6 +178,8 @@ summary { cursor: pointer; font-weight: 600; padding: 12px 0; }
 .tour-alternative { padding: 32px; border: 1px solid var(--color-border); border-radius: var(--radius-card); background: var(--color-surface); }
 .point-selection { display: grid; gap: 16px; border: 1px solid var(--color-border); border-radius: var(--radius-card); background: var(--color-surface); padding: 24px; margin: 32px 0; }
 .point-selection h2, .point-selection p { margin: 0; }
+.point-presence { font-size: 14px; color: var(--color-accent); font-weight: 600; }
+.point-presence:empty { display: none; }
 .point-selection label { max-width: 600px; }
 .point-selection .button { justify-self: start; }
 .room-heading { margin-top: 48px; }

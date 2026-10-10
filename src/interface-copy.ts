@@ -156,5 +156,7 @@ export const copy = {
     noContent: 'No hay contenido disponible en este punto.',
     readNarration: 'Leer narración',
     top: 'Volver al comienzo',
+    away: 'Te alejaste de este punto en el recorrido. Acércate de nuevo para seguir explorándolo.',
+    awayNarrated: 'Te alejaste de este punto y su narración queda en pausa. Acércate de nuevo para continuar.',
   },
 } as const
