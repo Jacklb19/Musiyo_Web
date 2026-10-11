@@ -37,7 +37,7 @@ function GuideQuestionForm({ element }: { element: string | null }) {
       if (!controller.signal.aborted) setResult(response)
     } catch (failure) {
       if (!controller.signal.aborted) setError(failure instanceof GuideRequestError
-        ? copy.guide.requestError(failure.status) : copy.guide.transportError)
+        ? copy.guide.requestError(failure.status, failure.retryAfterSeconds ?? 60) : copy.guide.transportError)
     } finally {
       if (!controller.signal.aborted) setPending(false)
     }

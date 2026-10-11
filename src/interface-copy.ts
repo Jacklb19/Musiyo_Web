@@ -12,7 +12,7 @@ export const copy = {
     transportError: 'No fue posible consultar el guía. Puedes reintentar o continuar con el catálogo y el recorrido.',
     alternatives: 'Continuar la visita', link: 'Guía textual', askRecord: 'Preguntar sobre esta ficha',
     resultTitle: (status: string) => status === 'answered' ? 'Respuesta con fuentes' : status === 'abstained' ? 'Falta información validada' : 'Guía no disponible',
-    requestError: (status: number | null) => status === 429 ? 'Demasiadas preguntas. Espera un minuto antes de volver a intentar.'
+    requestError: (status: number | null, retryAfterSeconds = 60) => status === 429 ? `Demasiadas preguntas. Espera ${retryAfterSeconds} segundos antes de volver a intentar.`
       : status === 422 ? 'Revisa tu pregunta: debe tener entre 3 y 500 caracteres.'
       : status === 408 ? 'La consulta tardó demasiado. Puedes reintentar o continuar la visita.'
       : 'No fue posible consultar el guía. Puedes reintentar o continuar la visita.',

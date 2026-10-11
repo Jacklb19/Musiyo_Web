@@ -61,3 +61,32 @@ test('guide timeouts must be bounded and cannot be fractional or invalid', () =>
     assert.throws(() => parseGuideConfig({ VITE_GUIDE_TIMEOUT_MS: value }))
   }
 })
+
+
+test('guide preserves throttle delay separately from HTTP 200 outcomes', async () => {
+  const question = { schema_version: 1, question: 'Pregunta de prueba' }
+  for (const [header, expected] of [['60', 60], ['120', 120], [null, 60], ['invalid', 60], ['-1', 60]]) {
+    await assert.rejects(requestGuide('/api/v1', question, new AbortController().signal, 15000,
+      async () => new Response('', { status: 429, headers: header ? { 'Retry-After': header } : {} })),
+    error => error instanceof GuideRequestError && error.status === 429 && error.retryAfterSeconds === expected)
+  }
+  for (const state of ['guide_answered', 'guide_abstained', 'guide_unavailable']) {
+    assert.deepEqual(await requestGuide('/api/v1', question, new AbortController().signal, 15000,
+      async () => new Response(JSON.stringify(fixture(state)))), fixture(state))
+  }
+})
+
+test('guide bounds response body reading and discards cancelled completions', async () => {
+  const question = { schema_version: 1, question: 'Pregunta de prueba' }
+  await assert.rejects(requestGuide('/api/v1', question, new AbortController().signal, 10,
+    async () => ({ ok: true, json: async () => {
+      await new Promise(resolve => setTimeout(resolve, 30))
+      return fixture('guide_answered')
+    } })), error => error instanceof GuideRequestError && error.status === 408)
+  const controller = new AbortController()
+  await assert.rejects(requestGuide('/api/v1', question, controller.signal, 15000,
+    async () => ({ ok: true, json: async () => {
+      controller.abort()
+      return fixture('guide_answered')
+    } })), error => error.name === 'AbortError')
+})
