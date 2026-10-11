@@ -1,0 +1,42 @@
+MUSIYO STATIC DISTRIBUTION PREPARATION
+
+Run npm run build and the focused project checks before preparing an artifact.
+Then: npm run deployment:prepare -- dist <external-manifest.json>
+The script lists checksums, byte counts, MIME types, compression and cache policy.
+It never connects to AWS, uploads objects, copies Unity builds or creates resources.
+
+The owner reviews the API AWS proposal plus static-site.cloudformation.json and
+confirms Free account plan eligibility/credits for S3, CloudFront, functions and IAM.
+USD 0 own spend is mandatory. Do not upgrade the account or enroll in a separate
+CloudFront flat-rate pricing plan by assuming its Free name means account eligibility.
+No AWS action has been performed by this preparation. Use an existing HTTPS API
+hostname, its private content bucket and one static Web bucket/distribution.
+
+After concrete owner approval, an authorized operator applies the reviewed template.
+Set the API Web origin to the resulting HTTPS CloudFront URL. Upload exactly the
+manifest-listed files to WebBucketName with each object's ContentType, CacheControl
+and optional ContentEncoding. Preserve relative keys. Example administrative pattern:
+aws s3api put-object --bucket <approved-web-bucket> --key <key> --body <dist-file>
+  --content-type <content_type> --cache-control <cache_control>
+  [--content-encoding <content_encoding>]
+Use the SDK/CLI identity of an approved operator; never put keys in VITE_ variables.
+Do not use a blanket S3 sync that drops Unity MIME or precompression metadata.
+Upload hashed assets first, Unity files only from the exact accepted closed build,
+and index.html/unity-build.json last. Invalidate changed unversioned keys after upload
+with an owner-approved CloudFront operation. Retain the previous manifest and object
+versions for rollback. Do not promise Windows/Quest downloads that do not exist.
+
+The CloudFront function rewrites extensionless React URLs to index.html. It preserves
+/api/, /unity/ and /assets/ errors; no global 403/404-to-HTML conversion is configured.
+API caching is disabled, cookies/query/CSRF headers are forwarded, and the custom
+origin requires HTTPS. Entry/player manifests use no-store; unversioned player files
+must revalidate. Hashed Vite assets can be immutable. .wasm is application/wasm,
+.framework.js is JavaScript, .data is binary; .br/.gz have corresponding encodings.
+.unityweb fallback streams are not given an HTTP compression encoding.
+
+Before public use check the actual CDN headers, React direct routes, missing Wasm
+404 behavior, authenticated API cookie/CSRF, signed resource CORS, security policy,
+and API restart. Offline templates/tests do not establish a working AWS deployment.
+The owner performs the short manual navigation: /guia, one cited ficha, abstention,
+provider disabled, retry, catalogue and visit. No automated museum walkthrough was
+run for this delivery. Desktop/tablet/mobile visual acceptance remains manual.

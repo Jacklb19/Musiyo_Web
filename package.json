@@ -14,7 +14,8 @@
     "lint": "oxlint src vite.config.ts --deny-warnings",
     "typecheck": "tsc --noEmit",
     "predev": "node scripts/sync-model-decoders.mjs",
-    "prebuild": "node scripts/sync-model-decoders.mjs"
+    "prebuild": "node scripts/sync-model-decoders.mjs",
+    "deployment:prepare": "node scripts/static-deployment.mjs"
   },
   "dependencies": {
     "@google/model-viewer": "4.3.1",

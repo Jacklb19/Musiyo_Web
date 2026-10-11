@@ -29,3 +29,7 @@ The React pages use shared tokens in `src/tokens.css` (Fraunces headings, DM San
 Check the home page, `/catalogo?category=mascaras`, an API-provided element detail and `/recorrido/texto` at desktop, tablet and mobile widths, including keyboard, empty results and retry. At mobile/tablet widths the tour offers HTML and does not mount Unity. The Web loading wrapper does not duplicate the Unity game menu.
 
 Do not run `unity:sync` while Unity is building. After each delivered build, synchronize once and validate entry, welcome, deep links, shared point selection, walking away from a selected point and back (`point_presence`), pause/resume, return to catalogue and engine disposal in React; the Unity checkout provides `tools/Development/verify_web_visit.py` for visible-browser screenshots of the engine itself. Public deployment and promotion to `main` remain separate release decisions.
+
+Guía textual: `/guia`, con consultas opcionales sobre una ficha y enlaces a las citas. Los fallos del guía conservan el acceso al catálogo y al recorrido. Contrato v1 exportado desde API; no se sincronizó ningún player durante esta entrega.
+
+Preparación AWS: `deployment/OPERATIONS.txt` y `deployment/static-site.cloudformation.json`. `npm run deployment:prepare -- dist <manifiesto-externo.json>` genera hashes y metadatos MIME/compresión sin subir archivos. El despliegue requiere cobertura del plan Free/créditos y aprobación concreta con USD 0 de gasto propio.
