@@ -26,3 +26,6 @@ Thumbs.db
 
 # Generated local model decoders
 /public/model-decoders/
+
+# Local handoff reports, operational state and private notes
+.local_docs/
