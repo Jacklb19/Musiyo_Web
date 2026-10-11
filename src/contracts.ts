@@ -78,6 +78,25 @@ export interface Guide {
   available: boolean
 }
 
+export interface GuideCitation {
+  element_slug: string
+  title: string
+}
+
+export interface GuideQuestion {
+  schema_version: 1
+  question: string
+  element_slug?: string | null
+}
+
+export interface GuideResponse {
+  schema_version: 1
+  status: "answered" | "abstained" | "provider_unavailable"
+  answer: string | null
+  citations: (GuideCitation)[]
+  reason: "insufficient_evidence" | "provider_unavailable" | null
+}
+
 export interface Health {
   status: "ok"
 }

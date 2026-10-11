@@ -282,3 +282,22 @@ footer nav a:hover { color: var(--color-gold); text-decoration: underline; }
 .site-shell[data-tone=light] .site-header { background: var(--color-background); color: var(--color-ink); border-bottom: 1px solid var(--color-border); }
 .site-shell[data-tone=light] .brand-sub { color: var(--color-muted); }
 .site-shell[data-tone=light] .site-header :focus-visible { outline-color: var(--color-accent); }
+
+.guide-page { max-width: 1000px; }
+.guide-reading { max-width: 760px; border-top: 2px solid var(--color-accent); padding-top: 28px; }
+.guide-form label { display: block; font-weight: 600; margin-bottom: 10px; }
+.guide-form textarea { width: 100%; padding: 16px; border: 1px solid var(--color-border); border-radius: var(--radius-control); background: var(--color-surface); resize: vertical; min-height: 128px; }
+.guide-form-footer { display: flex; justify-content: space-between; gap: 16px; }
+.guide-count { font-size: 12px; color: var(--color-muted); padding-top: 6px; }
+.guide-feedback { margin-top: 32px; }
+.guide-answer { border-top: 1px solid var(--color-border); padding-top: 28px; }
+.guide-submitted { font-size: 13px; color: var(--color-muted); }
+.guide-answer-text { font-size: 18px; line-height: 1.75; white-space: pre-wrap; }
+.guide-answer h3 { font-size: 18px; margin-top: 28px; }
+.guide-citations { padding-left: 20px; }
+.guide-citations a { display: inline-block; text-decoration: underline; text-underline-offset: 4px; padding-block: 8px; overflow-wrap: anywhere; }
+.guide-context { display: flex; flex-wrap: wrap; gap: 12px 24px; font-size: 13px; margin-bottom: 28px; }
+.guide-context p { width: 100%; margin-bottom: 0; }
+.guide-context a { text-decoration: underline; }
+.guide-alternatives { flex-wrap: wrap; margin-top: 40px; gap: 12px; }
+@media (max-width: 600px) { .site-header nav { flex-wrap: wrap; gap: 8px 20px; } .guide-alternatives { flex-direction: column; align-items: flex-start; } }

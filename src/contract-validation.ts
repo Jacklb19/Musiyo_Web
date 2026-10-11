@@ -1,3 +1,4 @@
+import guideResponseSchema from '../contracts/guide-response.v1.schema.json' with { type: 'json' }
 import tourSchema from '../contracts/tour.v1.schema.json' with { type: 'json' }
 import elementSchema from '../contracts/element.v1.schema.json' with { type: 'json' }
 import bridgeSchema from '../contracts/bridge.v1.schema.json' with { type: 'json' }
@@ -8,7 +9,7 @@ import catalogSchema from '../contracts/catalog.v1.schema.json' with { type: 'js
 import facetSchema from '../contracts/catalog-facet.v1.schema.json' with { type: 'json' }
 import accessSchema from '../contracts/resource-access.v1.schema.json' with { type: 'json' }
 import sessionSchema from '../contracts/validator-session.v1.schema.json' with { type: 'json' }
-import type { CatalogFacet, CatalogPage, Element, PointPresence, ResourceAccess, ReturnToCatalog, SelectionConfirmed, SelectionCleared, Tour, ValidatorSession } from './contracts.ts'
+import type { GuideResponse, CatalogFacet, CatalogPage, Element, PointPresence, ResourceAccess, ReturnToCatalog, SelectionConfirmed, SelectionCleared, Tour, ValidatorSession } from './contracts.ts'
 
 type Schema = {
   $ref?: string
@@ -148,4 +149,21 @@ export function parseValidatorSession(value: unknown): ValidatorSession {
   if (session.authenticated !== (!!session.user && !!session.csrf_token) ||
       !session.authenticated && (session.user != null || session.csrf_token != null)) throw new Error('Estado de sesión incompatible')
   return session
+}
+
+export function parseGuideResponse(value: unknown): GuideResponse {
+  if (!matches(value, guideResponseSchema as Schema, guideResponseSchema as Schema)) {
+    throw new Error('Respuesta del guía incompatible')
+  }
+  const response = value as GuideResponse
+  if (new Set(response.citations.map(citation => citation.element_slug)).size !== response.citations.length) {
+    throw new Error('Citas repetidas')
+  }
+  if (response.status === 'answered') {
+    if (!response.answer?.trim() || !response.citations.length || response.reason !== null) throw new Error('Respuesta sin evidencia')
+  } else if (response.answer !== null || response.citations.length !== 0 ||
+    response.reason !== (response.status === 'abstained' ? 'insufficient_evidence' : 'provider_unavailable')) {
+    throw new Error('Estado del guía incompatible')
+  }
+  return response
 }

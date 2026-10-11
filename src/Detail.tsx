@@ -48,6 +48,7 @@ export function Detail({ elementId }: { elementId?: string } = {}) {
     {data && <article className="ficha detail-layout">
       <header className="detail-heading">
       {session?.authenticated && <Link className="button secondary" to={'/validador/' + encodeURIComponent(data.slug)}>{copy.detail.correct}</Link>}
+      {!elementId && <Link className="button secondary" to={'/guia?element=' + encodeURIComponent(data.slug)}>{copy.guide.askRecord}</Link>}
       <p className="eyebrow">{copy.detail.eyebrow}</p><Title>{data.title}</Title>
       <dl className="detail-metadata">
         {data.community && <><dt>{copy.detail.community}</dt><dd>{data.community.name} · {copy.media.people[data.community.people] || data.community.people}</dd></>}
