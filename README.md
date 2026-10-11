@@ -35,3 +35,5 @@ Guía textual: `/guia`, con consultas opcionales sobre una ficha y enlaces a las
 Preparación AWS: `deployment/OPERATIONS.txt` y `deployment/static-site.cloudformation.json`. `npm run deployment:prepare -- dist <manifiesto-externo.json>` genera hashes y metadatos MIME/compresión sin subir archivos. El despliegue requiere cobertura del plan Free/créditos y aprobación concreta con USD 0 de gasto propio.
 
 Local API/Web session: use the API checkout’s `scripts/local-session.ps1` with an external configuration (see its `deployment/LOCAL_SESSION.txt`). The session process overrides an old `MUSIYO_DEV_API_TARGET` in `.env.local`; the browser keeps same-origin `/api/v1`. The textual guide retains questions on errors/cancellation and reports `Retry-After` for manual retry.
+
+A completed build in another checkout can be synchronized with `npm.cmd run unity:sync -- -SourcePath <completed-build-directory>`. Verify its build manifest and retain a hash-checked external copy of the current `public/unity` before replacement. The source and target must not overlap.
