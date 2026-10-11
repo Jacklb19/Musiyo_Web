@@ -1,5 +1,22 @@
 // Neutral visitor copy. Cultural descriptions and resource metadata come from the API.
 export const copy = {
+  guide: {
+    eyebrow: 'Guía / consulta en texto', title: 'Pregúntale al guía',
+    intro: 'Consulta las fichas autorizadas del museo. Las respuestas incluyen enlaces a sus fuentes.',
+    question: 'Tu pregunta', hint: 'Entre 3 y 500 caracteres. No incluyas datos personales.',
+    context: 'Esta consulta se limita a la ficha seleccionada.', clearContext: 'Consultar todo el catálogo autorizado',
+    submit: 'Consultar', pending: 'Consultando las fichas…', cancel: 'Cancelar', sources: 'Fichas citadas',
+    sourceHint: 'Abre las fichas para consultar sus fuentes, créditos y restricciones.',
+    abstained: 'No tengo información validada suficiente para responder. Puedes consultar las fichas o reformular tu pregunta.',
+    unavailable: 'El guía no está disponible en este momento. El catálogo, las fichas y el recorrido siguen funcionando.',
+    transportError: 'No fue posible consultar el guía. Puedes reintentar o continuar con el catálogo y el recorrido.',
+    alternatives: 'Continuar la visita', link: 'Guía textual', askRecord: 'Preguntar sobre esta ficha',
+    resultTitle: (status: string) => status === 'answered' ? 'Respuesta con fuentes' : status === 'abstained' ? 'Falta información validada' : 'Guía no disponible',
+    requestError: (status: number | null) => status === 429 ? 'Demasiadas preguntas. Espera un minuto antes de volver a intentar.'
+      : status === 422 ? 'Revisa tu pregunta: debe tener entre 3 y 500 caracteres.'
+      : status === 408 ? 'La consulta tardó demasiado. Puedes reintentar o continuar la visita.'
+      : 'No fue posible consultar el guía. Puedes reintentar o continuar la visita.',
+  },
   media: {
     video: 'Video',
     audio: 'Audio',

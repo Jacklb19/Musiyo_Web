@@ -1,6 +1,8 @@
 import { parseCatalog, parseFacets, parseElement, parseTour, parseResourceAccess, parseValidatorSession } from './contract-validation'
 
-import type { DetailCorrection } from './contracts'
+import { requestGuide } from './guide-client'
+import { guideConfig } from './guide-config'
+import type { GuideQuestion, DetailCorrection } from './contracts'
 
 export class ApiError extends Error {
   constructor(public status: number, message: string) { super(message) }
@@ -32,6 +34,7 @@ async function validatorRequest(path: string, method = 'GET', body?: unknown, cs
 }
 
 export const api = {
+  guideQuestion: (question: GuideQuestion, signal: AbortSignal) => requestGuide(base, question, signal, guideConfig.requestTimeoutMs),
   session: async (signal?: AbortSignal) => parseValidatorSession(await validatorRequest('/auth/session', 'GET', undefined, undefined, signal)),
   login: async (username: string, password: string) => parseValidatorSession(await validatorRequest('/auth/login', 'POST', { username, password })),
   logout: async (csrf: string) => { await validatorRequest('/auth/logout', 'POST', undefined, csrf) },

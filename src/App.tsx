@@ -10,6 +10,7 @@ import { Catalog } from './Catalog'
 import { Detail } from './Detail'
 import { Validator } from './Validator'
 import { ValidatorSessionProvider } from './validator-session'
+import { Guide } from './Guide'
 import { Home } from './Home'
 import { copy } from './interface-copy'
 import { presentation } from './presentation-config'
@@ -212,9 +213,9 @@ export default function App() {
   return <ValidatorSessionProvider><div className="site-shell" data-tone={location.pathname === '/' ? 'dark' : 'light'}>
     <a className="skip-link" href="#main-content">{copy.site.skip}</a>
     <header className="site-header"><Link className="brand" to="/"><span className="brand-mark" aria-hidden="true">MB</span><span>{copy.site.name}<span className="brand-sub">{copy.site.subtitle}</span></span></Link>
-      <nav aria-label={copy.site.navigation}><NavLink to="/" end>{copy.site.home}</NavLink><NavLink to="/catalogo">{copy.site.catalog}</NavLink><NavLink to="/recorrido">{copy.site.tour}</NavLink></nav>
+      <nav aria-label={copy.site.navigation}><NavLink to="/" end>{copy.site.home}</NavLink><NavLink to="/catalogo">{copy.site.catalog}</NavLink><NavLink to="/recorrido">{copy.site.tour}</NavLink><NavLink to="/guia">{copy.guide.link}</NavLink></nav>
     </header>
-    <main id="main-content" tabIndex={-1}><Routes><Route path="/" element={<Home />} /><Route path="/catalogo" element={<Catalog />} /><Route path="/elementos/:id" element={<Detail />} /><Route path="/recorrido" element={<TourPage />} /><Route path="/recorrido/texto" element={<TextTour />} /><Route path="/acerca" element={<About />} /><Route path="/privacidad" element={<Privacy />} /><Route path="/validador" element={<Validator />} /><Route path="/validador/:id" element={<Validator />} /><Route path="*" element={<NotFound />} /></Routes></main>
+    <main id="main-content" tabIndex={-1}><Routes><Route path="/" element={<Home />} /><Route path="/catalogo" element={<Catalog />} /><Route path="/elementos/:id" element={<Detail />} /><Route path="/recorrido" element={<TourPage />} /><Route path="/recorrido/texto" element={<TextTour />} /><Route path="/guia" element={<Guide />} /><Route path="/acerca" element={<About />} /><Route path="/privacidad" element={<Privacy />} /><Route path="/validador" element={<Validator />} /><Route path="/validador/:id" element={<Validator />} /><Route path="*" element={<NotFound />} /></Routes></main>
     <footer><div><span className="footer-brand">{copy.site.name}</span><p>{copy.site.subtitle}</p></div><nav aria-label={copy.site.information}><Link to="/validador">{copy.site.validators}</Link><Link to="/acerca">{copy.site.about}</Link><Link to="/privacidad">{copy.site.privacy}</Link><Link to="/recorrido/texto">{copy.home.textTour}</Link></nav></footer>
   </div></ValidatorSessionProvider>
 }
