@@ -4,19 +4,10 @@ import { api } from './api'
 import { useValidatorSession } from './validator-session'
 import { groupedBlocks, safeSourceUrl, subtitlesFor } from './detail-content'
 import { useApi } from './use-api'
-import type { Resource } from './contracts'
+import { RecordedAudio } from './RecordedAudio'
 import { ModelSection } from './ModelSection'
 import { copy } from './interface-copy'
 import { presentation } from './presentation-config'
-
-function RecordedAudio({ element, title, resource, downloadRestricted }: { element: string; title: string; resource: Resource; downloadRestricted: boolean }) {
-  if (!resource.transcription) return <p>{copy.media.noAudioTranscript}</p>
-  // HTML audio has a paired visible transcription below instead of a video caption track.
-  // oxlint-disable-next-line jsx-a11y/media-has-caption
-  return <audio controls preload="none" aria-label={copy.media.audioLabel(title, resource.kind === 'narration')} controlsList={downloadRestricted ? 'nodownload' : undefined}>
-    <source src={api.resourceUrl(element, resource.id)} type={resource.mime} />{copy.media.audioUnsupported}
-  </audio>
-}
 
 export function Detail({ elementId }: { elementId?: string } = {}) {
   const { session } = useValidatorSession()
@@ -86,8 +77,8 @@ export function Detail({ elementId }: { elementId?: string } = {}) {
             <source src={api.resourceUrl(id, resource.id)} type={resource.mime} />
             <track kind="captions" src={api.resourceUrl(id, subtitles.id)} srcLang="es" label={copy.media.spanish} default />
             {copy.media.videoUnsupported}
-          </video> : <p>{copy.media.noVideoCaptions}</p> : <RecordedAudio element={id} title={data.title} resource={resource} downloadRestricted={downloadRestricted} />}
-          {resource.transcription && <details><summary>{copy.detail.transcription}</summary><p>{resource.transcription}</p></details>}
+          </video> : <p>{copy.media.noVideoCaptions}</p> : <RecordedAudio key={id + resource.id + (subtitles?.id || '')} element={id} title={data.title} resource={resource} subtitles={subtitles} downloadRestricted={downloadRestricted} />}
+          {resource.kind === 'video' && resource.transcription && <details><summary>{copy.detail.transcription}</summary><p>{resource.transcription}</p></details>}
           {resource.credit && <p>{copy.common.credit}: {resource.credit}</p>}{resource.provenance && <p>{copy.common.provenance}: {resource.provenance}</p>}
         </div>
       })}</section>}
