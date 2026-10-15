@@ -40,3 +40,17 @@ and API restart. Offline templates/tests do not establish a working AWS deployme
 The owner performs the short manual navigation: /guia, one cited ficha, abstention,
 provider disabled, retry, catalogue and visit. No automated museum walkthrough was
 run for this delivery. Desktop/tablet/mobile visual acceptance remains manual.
+
+Local delivery verification
+Run node scripts/check-local-delivery.mjs LOOPBACK_ORIGIN NEW_EXTERNAL_REPORT to
+check HTML routes, every closed player manifest hash, Wasm MIME, a missing player's
+404, and one bounded burst of 20 visitors reading readiness/catalogue/tour. It never
+executes Unity, copies a player or walks the museum. Local results do not establish
+sustained load, guide throughput, headset access, CDN headers or HTTPS acceptance.
+Vite dev and preview preserve missing player errors, including an absent player folder.
+The static distribution manifest remains the source of deployment MIME/cache/encoding.
+
+The account planning ceiling is the initial USD 100 credit and USD 0 own spend.
+Use the API proposal's USD 20 reserve, verify account-wide credit coverage and expiry,
+and obtain concrete resource approval. Do not upgrade to Paid or assume future
+credit awards. No static artifact preparation command uploads or provisions resources.
