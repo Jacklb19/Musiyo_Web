@@ -18,6 +18,11 @@ export const copy = {
       : 'No fue posible consultar el guía. Puedes reintentar o continuar la visita.',
   },
   media: {
+    followAudio: 'Seguir la lectura con el audio',
+    timedReading: 'Transcripción sincronizada',
+    cuesLoading: 'Cargando lectura sincronizada…',
+    cuesUnavailable: 'La lectura sincronizada no está disponible. Puedes leer la transcripción completa.',
+    audioFailed: 'No fue posible reproducir el audio. Puedes reintentar o leer la transcripción.',
     video: 'Video',
     audio: 'Audio',
     duration: 'Duración',
