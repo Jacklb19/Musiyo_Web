@@ -89,6 +89,28 @@ export interface GuideQuestion {
   element_slug?: string | null
 }
 
+export interface GuideQuiz {
+  schema_version: 1
+  tour_key: string
+  room_key: string | null
+  questions: (QuizQuestion)[]
+}
+
+export interface GuideQuizAnswer {
+  schema_version: 1
+  id: string
+  option_id: string
+}
+
+export interface GuideQuizAnswerResult {
+  schema_version: 1
+  id: string
+  correct: boolean
+  explanation: string
+  citation: QuizCitation
+  source: Source
+}
+
 export interface GuideResponse {
   schema_version: 1
   status: "answered" | "abstained" | "provider_unavailable"
@@ -149,6 +171,25 @@ export interface Problem {
   status: number
   code: "not_found" | "schema_incompatible" | "validation" | "service_unavailable" | "unauthenticated" | "forbidden" | "rate_limited"
   detail: string
+}
+
+export interface QuizCitation {
+  element_slug: string
+  source_id: string
+  quote: string
+}
+
+export interface QuizOption {
+  id: string
+  text: string
+}
+
+export interface QuizQuestion {
+  id: string
+  text: string
+  options: (QuizOption)[]
+  element_slug: string
+  source_id: string
 }
 
 export interface Resource {
