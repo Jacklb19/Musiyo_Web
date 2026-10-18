@@ -1,3 +1,6 @@
+import quizSchema from '../contracts/guide-quiz.v1.schema.json' with { type: 'json' }
+import quizAnswerSchema from '../contracts/guide-quiz-answer-result.v1.schema.json' with { type: 'json' }
+import type { GuideQuiz, GuideQuizAnswerResult } from './contracts.ts'
 import guideResponseSchema from '../contracts/guide-response.v1.schema.json' with { type: 'json' }
 import tourSchema from '../contracts/tour.v1.schema.json' with { type: 'json' }
 import elementSchema from '../contracts/element.v1.schema.json' with { type: 'json' }
@@ -166,4 +169,20 @@ export function parseGuideResponse(value: unknown): GuideResponse {
     throw new Error('Estado del guía incompatible')
   }
   return response
+}
+
+export function parseQuiz(value: unknown): GuideQuiz {
+  if (!matches(value, quizSchema as Schema, quizSchema as Schema)) throw new Error('Encuesta incompatible')
+  const quiz = value as GuideQuiz
+  if (new Set(quiz.questions.map(q => q.id)).size !== quiz.questions.length || quiz.questions.some(q =>
+    new Set(q.options.map(o => o.id)).size !== q.options.length ||
+    new Set(q.options.map(o => o.text.trim().toLocaleLowerCase('es'))).size !== q.options.length)) throw new Error('Opciones de encuesta incompatibles')
+  return quiz
+}
+
+export function parseQuizAnswer(value: unknown): GuideQuizAnswerResult {
+  if (!matches(value, quizAnswerSchema as Schema, quizAnswerSchema as Schema)) throw new Error('Respuesta de encuesta incompatible')
+  const answer = value as GuideQuizAnswerResult
+  if (answer.citation.source_id !== answer.source.id) throw new Error('Fuente de encuesta incompatible')
+  return answer
 }

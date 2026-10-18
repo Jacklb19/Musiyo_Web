@@ -1,0 +1,15 @@
+export const quizCopy = {
+  eyebrow: 'Al terminar la visita', title: 'Un momento junto al fogón',
+  intro: 'Puedes cerrar el recorrido con unas preguntas sobre lo que descubriste. No hay tiempo límite ni nota; puedes pasar una pregunta o terminar cuando quieras.',
+  start: 'Conversar sobre la visita', close: 'Terminar por ahora', loading: 'Preparando las preguntas…',
+  empty: 'Por ahora no hay preguntas disponibles. Puedes seguir explorando las fichas y sus fuentes.',
+  retry: 'Volver a cargar', check: 'Comprobar mi respuesta', next: 'Siguiente pregunta', skip: 'Pasar esta pregunta',
+  choose: 'Elige una opción.', sending: 'Consultando la explicación…',
+  correct: 'Tu respuesta coincide con lo documentado.', incorrect: 'Vamos a mirar lo que explica la fuente.',
+  source: 'Consultar la ficha y su fuente', evidence: 'Fragmento de apoyo',
+  done: 'Gracias por compartir este momento.', doneText: 'Puedes volver a las piezas, consultar sus fuentes o continuar tu visita a tu ritmo.',
+  failure: 'No se pudo consultar la encuesta. Puedes volver a intentarlo o continuar tu visita.',
+  unavailable: 'Esta pregunta dejó de estar disponible. Vuelve a cargar las preguntas vigentes.',
+  rateLimit: (seconds: number) => `Espera ${seconds} segundos antes de volver a consultar.`,
+  progress: (current: number, total: number) => `Pregunta ${current} de ${total}`,
+} as const

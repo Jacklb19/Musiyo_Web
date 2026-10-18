@@ -1,3 +1,4 @@
+import { VisitQuiz } from './VisitQuiz'
 import { exhibitionCopy as ui } from './exhibition-copy'
 
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
@@ -11,6 +12,7 @@ import { presentation } from './presentation-config'
 import { Arrow, SearchIcon, Status } from './exhibition-ui'
 
 export function Catalog() {
+  const location = useLocation()
   const [params, setParams] = useSearchParams()
   const request = catalogRequest(params).toString()
   const results = useData(useCallback((signal: AbortSignal) => api.catalog(new URLSearchParams(request), signal), [request]))
@@ -30,6 +32,7 @@ export function Catalog() {
   function applyCategory(value: string) { setParams(changeCatalogFilter(params, 'category', value)) }
   function changePage(value: number) { const next = new URLSearchParams(params); next.set('page', String(value)); setParams(next); document.getElementById('catalog-results')?.focus() }
   return <section className="collection-page page-shell">
+    {location.state?.visitCompleted === true && <VisitQuiz/>}
     <div className="breadcrumb"><Link to="/">{ui.discover}</Link><span>/</span><span>{ui.collection}</span></div>
     <div className="collection-masthead"><p className="eyebrow">{ui.collectionModes}</p><h1>{ui.collectionHeading}<span className="accent-dot">.</span></h1><p>{ui.collectionIntro}</p></div>
     <div className="collection-toolbar"><form className="search-form" onSubmit={submit}><label className="sr-only" htmlFor="collection-query">{ui.searchCollection}</label><SearchIcon/><input ref={search} id="collection-query" name="query" type="search" maxLength={200} placeholder={ui.searchPlaceholder} defaultValue={query}/><button className="circle" type="submit" aria-label={ui.search}>→</button></form><button className="pill filter-toggle" ref={filterButton} onClick={() => { setDraftCategory(category); dialog.current?.showModal() }}>Temas {category ? '· 1' : '+'}</button></div>
@@ -57,5 +60,7 @@ function CollectionSpotlight() {
 
 function CollectionEntry({ item, index }: { item: CatalogItem; index: number }) {
   const location = useLocation()
-  return <Link className={`collection-entry ${item.has_3d_model ? 'has-model' : ''}`} to={`/elementos/${item.slug}`} state={{ from: location.pathname + location.search }}><span className="entry-number">{String(index + 1).padStart(2, '0')}</span><div className="entry-content"><p className="eyebrow">{item.category?.name || ui.museumFallback}{item.community ? ` · ${item.community}` : ''}</p><h2>{item.title}</h2><p>{item.description}</p><div className="entry-media">{item.has_3d_model && <span>{ui.modelAvailable}</span>}{item.has_narration && <span>{ui.narrationAvailable}</span>}<span>{ui.textSources}</span></div></div><span className="entry-action circle" aria-hidden="true"><Arrow/></span></Link>
+  const [failedImage, setFailedImage] = useState<string | null>(null)
+  const thumbnail = item.thumbnail_resource_id && failedImage !== item.thumbnail_resource_id ? item.thumbnail_resource_id : null
+  return <Link className={`collection-entry ${item.has_3d_model ? 'has-model' : ''}`} to={`/elementos/${item.slug}`} state={{ from: location.pathname + location.search }}><span className="entry-number">{String(index + 1).padStart(2, '0')}</span>{thumbnail && <img className="entry-thumbnail" src={api.resourceUrl(item.slug, thumbnail)} alt="" width="128" height="96" loading="lazy" decoding="async" onError={() => setFailedImage(thumbnail)}/>}<div className="entry-content"><p className="eyebrow">{item.category?.name || ui.museumFallback}{item.community ? ` · ${item.community}` : ''}</p><h2>{item.title}</h2><p>{item.description}</p><div className="entry-media">{item.has_3d_model && <span>{ui.modelAvailable}</span>}{item.has_narration && <span>{ui.narrationAvailable}</span>}<span>{ui.textSources}</span></div></div><span className="entry-action circle" aria-hidden="true"><Arrow/></span></Link>
 }

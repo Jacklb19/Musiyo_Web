@@ -1,5 +1,7 @@
 import { parseCatalog, parseFacets, parseElement, parseTour, parseResourceAccess, parseValidatorSession } from './contract-validation'
 
+import { requestQuiz, requestQuizAnswer } from './quiz-client'
+import type { GuideQuizAnswer } from './contracts'
 import { requestGuide } from './guide-client'
 import { guideConfig } from './guide-config'
 import type { GuideQuestion, DetailCorrection } from './contracts'
@@ -34,6 +36,8 @@ async function validatorRequest(path: string, method = 'GET', body?: unknown, cs
 }
 
 export const api = {
+  quiz: (tourKey: string, signal: AbortSignal) => requestQuiz(base, tourKey, signal, guideConfig.requestTimeoutMs),
+  quizAnswer: (answer: GuideQuizAnswer, signal: AbortSignal) => requestQuizAnswer(base, answer, signal, guideConfig.requestTimeoutMs),
   guideQuestion: (question: GuideQuestion, signal: AbortSignal) => requestGuide(base, question, signal, guideConfig.requestTimeoutMs),
   session: async (signal?: AbortSignal) => parseValidatorSession(await validatorRequest('/auth/session', 'GET', undefined, undefined, signal)),
   login: async (username: string, password: string) => parseValidatorSession(await validatorRequest('/auth/login', 'POST', { username, password })),

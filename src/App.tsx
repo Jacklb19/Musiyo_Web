@@ -1,3 +1,4 @@
+import { VisitQuiz } from './VisitQuiz'
 import { ExhibitionHome, ExhibitionCollection, ExhibitionDetail, VisitPreparation, PublicShell, PageLifecycle } from './Exhibition'
 import { useCallback, useEffect, useState } from 'react'
 import { Link, Route, Routes, useNavigate, useSearchParams } from 'react-router-dom'
@@ -61,7 +62,7 @@ function TourPage() {
     // Unity only asks; the page performs the navigation at the end of the suggested route.
     function onNavigation(event: Event) {
       const message = parseReturnToCatalog((event as CustomEvent<unknown>).detail)
-      if (data && instance && message?.data.tour_key === data.tour.key) navigate('/catalogo')
+      if (data && instance && message?.data.tour_key === data.tour.key) navigate('/catalogo', { state: { visitCompleted: true } })
     }
     window.addEventListener('musiyo:navigation', onNavigation)
     return () => window.removeEventListener('musiyo:navigation', onNavigation)
@@ -176,6 +177,7 @@ export default function App() {
     <Route path="/elementos/:id" element={<ExhibitionDetail/>}/>
     <Route path="/recorrido" element={<div className="legacy-content"><TourPage/></div>}/>
     <Route path="/recorrido/texto" element={<VisitPreparation/>}/>
+    <Route path="/recorrido/cierre" element={<section className="page-shell"><VisitQuiz heading="h1"/></section>}/>
     <Route path="/guia" element={<div className="legacy-content"><Guide/></div>}/>
     <Route path="/acerca" element={<div className="legacy-content"><About/></div>}/>
     <Route path="/privacidad" element={<div className="legacy-content"><Privacy/></div>}/>
