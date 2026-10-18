@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { safeCatalogReturn, shouldAutoLoadModel } from '../src/visit-navigation.ts'
+import { safeCatalogReturn, shouldAutoLoadModel, uniqueElements } from '../src/visit-navigation.ts'
 
 test('detail return preserves validated catalogue context without accepting external or different routes', () => {
   const result = new URL(safeCatalogReturn('/catalogo?query=m%C3%A1scara&category=mascaras&collection=local&page=2&unexpected=discard'), 'https://museum.invalid')
@@ -21,4 +21,13 @@ test('automatic model requests honor data saving and reported slow connections',
   assert.equal(shouldAutoLoadModel({ saveData: true, effectiveType: '4g' }), false)
   assert.equal(shouldAutoLoadModel({ saveData: false, effectiveType: '4g' }), true)
   assert.equal(shouldAutoLoadModel(), true)
+})
+
+test('room reading lists each record once when the shared tour assigns it to multiple points', () => {
+  const first = { slug: 'shared-record', title: 'First published reference' }
+  const second = { slug: 'another-record', title: 'Another reference' }
+  const input = [first, second, { ...first }]
+  assert.deepEqual(uniqueElements(input), [first, second])
+  assert.equal(input.length, 3)
+  assert.equal(uniqueElements(input)[0], first)
 })

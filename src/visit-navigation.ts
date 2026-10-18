@@ -20,3 +20,12 @@ export interface ConnectionInformation { saveData?: boolean; effectiveType?: str
 export function shouldAutoLoadModel(connection?: ConnectionInformation): boolean {
   return !connection?.saveData && !['slow-2g', '2g', '3g'].includes(connection?.effectiveType || '')
 }
+
+export function uniqueElements<T extends { slug: string }>(items: readonly T[]): T[] {
+  const seen = new Set<string>()
+  return items.filter(item => {
+    if (seen.has(item.slug)) return false
+    seen.add(item.slug)
+    return true
+  })
+}
