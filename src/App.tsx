@@ -82,14 +82,6 @@ function TourPage() {
   }, [])
 
   useEffect(() => {
-    if (!instance || !data) return
-    const query = new URLSearchParams({ tour: data.tour.key })
-    if (validPoint) query.set('point', point!)
-    if (validPoint && element) query.set('element', element)
-    instance.SendMessage('MuseumBlockout', 'ApplySelection', query.toString())
-  }, [instance, data, point, element, validPoint])
-
-  useEffect(() => {
     function onSelection(event: Event) {
       const cleared = parseClearedSelection((event as CustomEvent<unknown>).detail)
       if (data && instance && cleared?.data.tour_key === data.tour.key) {
@@ -117,6 +109,15 @@ function TourPage() {
     window.addEventListener('musiyo:selection', onSelection)
     return () => window.removeEventListener('musiyo:selection', onSelection)
   }, [data, instance, setParams])
+
+  // Unity can confirm a selection synchronously, so its listener must already use the current engine.
+  useEffect(() => {
+    if (!instance || !data) return
+    const query = new URLSearchParams({ tour: data.tour.key })
+    if (validPoint) query.set('point', point!)
+    if (validPoint && element) query.set('element', element)
+    instance.SendMessage('MuseumBlockout', 'ApplySelection', query.toString())
+  }, [instance, data, point, element, validPoint])
 
   return <section className="page tour-page">
     <div className="section-heading"><div><p className="eyebrow">{copy.tour.eyebrow}</p>
