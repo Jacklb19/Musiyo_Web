@@ -1,97 +1,47 @@
-import { useCallback, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
-import { api } from './api'
-import { useValidatorSession } from './validator-session'
-import { groupedBlocks, safeSourceUrl, subtitlesFor } from './detail-content'
-import { useApi } from './use-api'
-import { RecordedAudio } from './RecordedAudio'
-import { ModelSection } from './ModelSection'
-import { copy } from './interface-copy'
+import { exhibitionCopy as ui } from './exhibition-copy'
+
+import { useEffect } from 'react'
+import { Link, useLocation, useParams } from 'react-router-dom'
+import type { Element as MuseumElement } from './contracts'
+import { useRecord, useTour } from './exhibition-data'
+import { ModelStage } from './ModelStage'
+import { ExhibitionAudio as AudioPlayer } from './ExhibitionAudio'
+import { Guide as ContextGuide } from './Guide'
+import { ResourceMedia } from './ResourceMedia'
 import { presentation } from './presentation-config'
+import { safeCatalogReturn } from './visit-navigation'
+import { useValidatorSession } from './validator-session'
+import { Arrow, Status } from './exhibition-ui'
 
-export function Detail({ elementId }: { elementId?: string } = {}) {
+const labels = { documented_fact: ui.documented, testimony: ui.testimony, interpretation: ui.interpretation }
+
+export function Detail() {
+  const { id: slug = '' } = useParams()
   const { session } = useValidatorSession()
-  const { id: routeId = '' } = useParams()
-  const id = elementId || routeId
-  const [attempt, setAttempt] = useState(0)
-  const load = useCallback((signal: AbortSignal) => {
-    void attempt
-    return api.element(id, signal)
-  }, [id, attempt])
-  const { data, error, loading } = useApi(load)
-  const tourKey = presentation.tourKey
-  const loadTour = useCallback((signal: AbortSignal) => api.tour(tourKey, signal), [tourKey])
-  const tour = useApi(loadTour)
-  const point = tour.data?.rooms.flatMap((room) => room.points).find((candidate) => candidate.elements.some((item) => item.slug === id))
-  const tourQuery = new URLSearchParams({ tour: tourKey, point: point?.key || '', element: id })
-  const resources = data?.resources || []
-  const models = resources.filter((resource) => resource.kind === 'model_3d')
-  const images = resources.filter((resource) => resource.kind === 'image')
-  const recordings = resources.filter((resource) => ['audio', 'narration', 'video'].includes(resource.kind))
-  const downloadRestricted = data?.restrictions?.some((restriction) => restriction.kind === 'no_download') || false
-  const Title = elementId ? 'h2' : 'h1'
-  const Heading = elementId ? 'h3' : 'h2'
+  const record = useRecord(slug)
+  const location = useLocation()
+  const from = safeCatalogReturn(location.state?.from)
+  const element = record.data
+  useEffect(() => { if (element) document.title = `${element.title} · Musiyo Bëtsknaté` }, [element])
+  const model = element?.resources?.find(resource => resource.kind === 'model_3d')
+  const narration = element?.resources?.find(resource => resource.kind === 'narration')
+  const tour = useTour()
+  const room = tour.data?.rooms.find(room => room.points.some(point => point.elements.some(item => item.slug === slug)))
+  const selectedPoint = room?.points.find(point => point.elements.some(item => item.slug === slug))
+  const group = selectedPoint?.elements.filter(item => item.slug !== slug)
+  const selection = new URLSearchParams({ tour: presentation.tourKey, point: selectedPoint?.key || '', element: slug })
+  return <article className={`detail-page page-shell ${model ? 'detail-with-model' : 'detail-reading'}`} key={slug}>
+    <div className="breadcrumb"><Link to={from} state={{ restoreCatalog: true }}>{ui.backBreadcrumb}</Link><span>/</span><span>{element?.category?.name || ui.pieceFallback}</span></div><Status {...record}/>
+    {element && <><header className="detail-heading"><p className="eyebrow">{element.community?.name || ui.museumName}{room ? ` · ${room.name}` : ''}</p><h1>{element.title}</h1>{session?.authenticated && <Link className="underlined" to={`/validador/${encodeURIComponent(slug)}`}>{ui.correctRecord}</Link>}<nav aria-label={ui.recordContents}><a href="#reading" onClick={event => { event.preventDefault(); document.getElementById('reading')?.scrollIntoView() }}>{ui.readDetail}</a><a href="#sources" onClick={event => { event.preventDefault(); document.getElementById('sources')?.scrollIntoView() }}>{ui.sourcesJump}</a></nav></header>
+    <div className="detail-layout">{model && <aside className="detail-media"><div className="media-frame"><span className="eyebrow">{ui.modelLabel}</span><ModelStage key={model.id} resource={model} title={element.title}/></div>{model.credit && <p className="media-credit">{model.credit}</p>}</aside>}
+    <div className="detail-text" id="reading"><p className="detail-description">{element.description}</p>{element.technique && <p className="technique"><span>{ui.technique}</span>{element.technique}</p>}{narration && <AudioPlayer key={narration.id} slug={slug} resource={narration} resources={element.resources || []} title={element.title}/>}
+    <div className="reading-blocks">{element.blocks?.map((block, index) => <section key={block.id} className={`reading-block block-${block.kind}`}><p className="eyebrow">{labels[block.kind]}</p>{block.kind === 'testimony' ? <blockquote>{block.text}</blockquote> : <p>{block.text}</p>}{block.attribution && <p className="block-attribution">{block.attribution}</p>}{block.context && <p className="small-copy">{block.context}</p>}{block.source_id && <a className="source-reference" href={`#source-${block.source_id}`} onClick={event => { event.preventDefault(); const details = document.getElementById('source-details') as HTMLDetailsElement | null; if (details) details.open = true; document.getElementById(`source-${block.source_id}`)?.scrollIntoView() }}>{ui.consultSource} <sup>{(element.sources?.findIndex(source => source.id === block.source_id) ?? -1) + 1 || index + 1}</sup> ↗</a>}</section>)}</div>
+    {group && group.length > 0 && <section className="same-point"><p className="eyebrow">{ui.samePoint}</p>{group.map(item => <Link key={item.slug} to={`/elementos/${item.slug}`} state={{ from }}>{item.title} <Arrow/></Link>)}</section>}
+    <ResourceMedia element={element}/><Sources element={element}/><ContextGuide key={slug} elementSlug={slug} embedded/></div></div>
+    <section className="detail-continuation"><div><p className="eyebrow">{ui.continueVisit}</p><h2>{ui.alwaysAnother}<br/><em>{ui.anotherView}</em></h2></div><div className="continuation-actions">{selectedPoint && <Link className="pill primary visit-3d-link" to={'/recorrido?' + selection.toString()}>{ui.enterTour} <Arrow/></Link>}<Link className="pill dark" to={from} state={{ restoreCatalog: true }}>{ui.backCollection} <Arrow/></Link>{room && <Link className="underlined" to={`/recorrido/texto?room=${encodeURIComponent(room.key)}`}>Encontrar en {room.name} <Arrow/></Link>}</div></section></>}
+  </article>
+}
 
-  return <section className="page detail-page">
-    <Link className="back" to="/catalogo">{copy.common.backCatalog}</Link>
-    {loading && <output className="status">{copy.detail.loading}</output>}
-    {error && <p className="status error" role="alert">{error} <button type="button" onClick={() => setAttempt((value) => value + 1)}>{copy.common.retry}</button></p>}
-    {data && <article className="ficha detail-layout">
-      <header className="detail-heading">
-      {session?.authenticated && <Link className="button secondary" to={'/validador/' + encodeURIComponent(data.slug)}>{copy.detail.correct}</Link>}
-      {!elementId && <Link className="button secondary" to={'/guia?element=' + encodeURIComponent(data.slug)}>{copy.guide.askRecord}</Link>}
-      <p className="eyebrow">{copy.detail.eyebrow}</p><Title>{data.title}</Title>
-      <dl className="detail-metadata">
-        {data.community && <><dt>{copy.detail.community}</dt><dd>{data.community.name} · {copy.media.people[data.community.people] || data.community.people}</dd></>}
-        {data.category && <><dt>{copy.detail.category}</dt><dd><Link to={'/catalogo?category=' + encodeURIComponent(data.category.slug)}>{data.category.name}</Link></dd></>}
-        {!!data.collections?.length && <><dt>{copy.detail.collections}</dt><dd>{data.collections.map((collection) => <Link key={collection.slug} to={'/catalogo?collection=' + encodeURIComponent(collection.slug)}>{collection.name}</Link>)}</dd></>}
-        {data.technique && <><dt>{copy.detail.technique}</dt><dd>{data.technique}</dd></>}
-        {!!data.materials?.length && <><dt>{copy.detail.materials}</dt><dd>{data.materials.join(', ')}</dd></>}
-      </dl>
-      <p className="lead detail-description">{data.description}</p>
-      {point && <div className="detail-actions"><Link className="button primary detail-tour-link" to={'/recorrido?' + tourQuery.toString()}>{copy.detail.openTour} <span aria-hidden="true">→</span></Link><Link className="text-tour-link" to="/recorrido/texto">{copy.detail.openTextTour}</Link></div>}
-      </header>
-      <div className="detail-body">
-      {groupedBlocks(data).map((group) => <section key={group.kind}><Heading>{group.title}</Heading>{group.blocks.map((block) => {
-        const source = data.sources?.find((item) => item.id === block.source_id)
-        return <div className="detail-block" key={block.id}>
-          {block.attribution && <p className="block-attribution">{group.kind === 'interpretation' ? copy.detail.accordingTo : ''}{block.attribution}</p>}
-          <p>{block.text}</p>{block.context && <p className="block-context">{copy.detail.context}: {block.context}</p>}
-          {source && <p className="block-source">{copy.detail.source}: {source.reference}</p>}
-        </div>
-      })}</section>)}
-      </div>
-      <div className="detail-media">
-      {models.map((resource, index) => <ModelSection key={id + resource.id} resource={resource} title={data.title} index={index} embedded={!!elementId} />)}
-      {!models.length && !images.length && <div className="reading-preview"><span aria-hidden="true">Aa</span><p>{copy.detail.noResources}</p></div>}
-      {!!images.length && <section><Heading>{copy.detail.images}</Heading>{images.map((resource) => <figure key={resource.id}>
-        <img className="detail-image" src={api.resourceUrl(id, resource.id)} alt={resource.alternative_text || copy.media.imageLabel(data.title)} loading="lazy" />
-        <figcaption>{resource.credit && <span>{copy.common.credit}: {resource.credit}</span>}{resource.provenance && <span>{copy.common.provenance}: {resource.provenance}</span>}</figcaption>
-      </figure>)}</section>}
-      {!!recordings.length && <section id="narrations"><Heading>{copy.detail.multimedia}</Heading>{recordings.map((resource, index) => {
-        const subtitles = subtitlesFor(resource, resources)
-        return <div className="media-item" key={resource.id}>
-          <h3>{resource.kind === 'narration' ? copy.common.narration : resource.kind === 'video' ? copy.media.video : copy.media.audio} {index + 1}</h3>
-          {resource.duration_seconds != null && <p>{copy.media.duration}: {copy.media.seconds(Math.round(resource.duration_seconds))}</p>}
-          {resource.kind === 'video' ? subtitles ? <video controls preload="none" aria-label={copy.media.videoLabel(data.title)} controlsList={downloadRestricted ? 'nodownload' : undefined}>
-            <source src={api.resourceUrl(id, resource.id)} type={resource.mime} />
-            <track kind="captions" src={api.resourceUrl(id, subtitles.id)} srcLang="es" label={copy.media.spanish} default />
-            {copy.media.videoUnsupported}
-          </video> : <p>{copy.media.noVideoCaptions}</p> : <RecordedAudio key={id + resource.id + (subtitles?.id || '')} element={id} title={data.title} resource={resource} subtitles={subtitles} downloadRestricted={downloadRestricted} />}
-          {resource.kind === 'video' && resource.transcription && <details><summary>{copy.detail.transcription}</summary><p>{resource.transcription}</p></details>}
-          {resource.credit && <p>{copy.common.credit}: {resource.credit}</p>}{resource.provenance && <p>{copy.common.provenance}: {resource.provenance}</p>}
-        </div>
-      })}</section>}
-      </div>
-      <div className="detail-support">
-      {!!data.sources?.length && <section><Heading>{copy.detail.sources}</Heading>{data.sources.map((source) => {
-        const url = safeSourceUrl(source.url)
-        return <p key={source.id}>{url ? <a href={url} target="_blank" rel="noopener noreferrer">{source.reference} <span className="visually-hidden">{copy.media.externalTab}</span></a> : source.reference}</p>
-      })}</section>}
-      {!!data.credits?.length && <section><Heading>{copy.detail.credits}</Heading>{data.credits.map((credit, index) => <p key={index}>{credit.role ? credit.role + ': ' : ''}{credit.name}</p>)}</section>}
-      {!!data.restrictions?.length && <section><Heading>{copy.detail.restrictions}</Heading>{data.restrictions.map((restriction, index) => <p key={index}>{restriction.description}</p>)}</section>}
-      {data.last_modified && <p className="last-modified">{copy.media.lastCorrection}: <time dateTime={data.last_modified.date}>{new Intl.DateTimeFormat('es-CO', { dateStyle: 'long', timeZone: 'America/Bogota' }).format(new Date(data.last_modified.date))}</time>, {copy.media.author} {data.last_modified.author}.</p>}
-      </div>
-    </article>}
-  </section>
+function Sources({ element }: { element: MuseumElement }) {
+  return <section id="sources" className="sources"><details id="source-details"><summary>{ui.sources} <span>{element.sources?.length || 0} +</span></summary><ol>{element.sources?.map(source => <li id={`source-${source.id}`} key={source.id}><p>{source.reference}</p>{source.url && /^https?:\/\//.test(source.url) && <a className="underlined" href={source.url} target="_blank" rel="noreferrer">{ui.consultPublication} <Arrow/></a>}</li>)}</ol></details><details><summary>{ui.creditsProvenance} <span>+</span></summary>{element.credits?.map((credit, index) => <p key={index}>{credit.role}: {credit.name}</p>)}{element.resources?.map(resource => <div key={resource.id}><p>{resource.credit}</p><p className="small-copy">{resource.provenance}</p></div>)}{!element.credits?.length && !element.resources?.length && <p>{ui.noExtraCredits}</p>}</details><details><summary>{ui.usageConditions} <span>+</span></summary>{element.restrictions?.length ? element.restrictions.map((restriction, index) => <p key={index}>{restriction.description}</p>) : <p>{ui.checkSources}</p>}</details></section>
 }

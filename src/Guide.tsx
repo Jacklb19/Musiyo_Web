@@ -5,14 +5,14 @@ import type { GuideResponse } from './contracts'
 import { GuideRequestError } from './guide-client'
 import { copy } from './interface-copy'
 
-export function Guide() {
+export function Guide({ elementSlug, embedded = false }: { elementSlug?: string; embedded?: boolean } = {}) {
   const [params] = useSearchParams()
-  const element = params.get('element')
+  const element = elementSlug || params.get('element')
   // Changing the selected record unmounts the request state and cancels its request.
-  return <GuideQuestionForm key={element || ''} element={element && /^\S{1,100}$/.test(element) ? element : null} />
+  return <GuideQuestionForm key={element || ''} embedded={embedded} element={element && /^\S{1,100}$/.test(element) ? element : null} />
 }
 
-function GuideQuestionForm({ element }: { element: string | null }) {
+function GuideQuestionForm({ element, embedded }: { element: string | null; embedded: boolean }) {
   const [question, setQuestion] = useState('')
   const [submitted, setSubmitted] = useState('')
   const [pending, setPending] = useState(false)
@@ -49,8 +49,9 @@ function GuideQuestionForm({ element }: { element: string | null }) {
     setSubmitted('')
   }
 
-  return <section className="page guide-page">
-    <p className="eyebrow">{copy.guide.eyebrow}</p><h1>{copy.guide.title}</h1>
+  const Heading = embedded ? 'h2' : 'h1'
+  return <section className={embedded ? "guide embedded-guide" : "page guide-page"}>
+    <p className="eyebrow">{copy.guide.eyebrow}</p><Heading>{copy.guide.title}</Heading>
     <p className="page-intro">{copy.guide.intro}</p>
     <div className="guide-reading">
       {element && <div className="guide-context"><p>{copy.guide.context}</p>

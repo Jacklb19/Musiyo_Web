@@ -14,3 +14,13 @@ test('presentation configuration rejects URLs, query injection and invalid keys'
     assert.throws(() => parsePresentationConfig({ VITE_TOUR_KEY: value }), /Invalid tour key/)
   }
 })
+
+test('editorial selections validate record identifiers without accepting URLs or query injection', () => {
+  const config = parsePresentationConfig({ VITE_FEATURED_ELEMENT_SLUG: 'approved-model', VITE_INTRODUCTION_SLUG: 'approved-story' })
+  assert.equal(config.featuredElementSlug, 'approved-model')
+  assert.equal(config.introductionSlug, 'approved-story')
+  for (const value of ['https://example.test', '../private', 'record?x=y', 'a'.repeat(101), 'bad key']) {
+    assert.throws(() => parsePresentationConfig({ VITE_FEATURED_ELEMENT_SLUG: value }), /Invalid editorial element slug/)
+    assert.throws(() => parsePresentationConfig({ VITE_INTRODUCTION_SLUG: value }), /Invalid editorial element slug/)
+  }
+})

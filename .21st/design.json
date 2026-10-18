@@ -1,0 +1,63 @@
+{
+  "project": "Musiyo Bëtsknaté",
+  "scope": "Production React Web integration of the owner-approved composition and palette A",
+  "stack": [
+    "React 19",
+    "TypeScript",
+    "React Router",
+    "CSS",
+    "model-viewer"
+  ],
+  "tokens": {
+    "night": "#211724",
+    "paper": "#F8F0E6",
+    "amber": "#E7AE45",
+    "carmine": "#A8385C",
+    "green": "#29716B"
+  },
+  "typography": {
+    "display": "Bodoni Moda",
+    "body": "Instrument Sans",
+    "license": "SIL Open Font License 1.1; bundled notices in public/fonts"
+  },
+  "decisions": [
+    {
+      "date": "2026-10-17",
+      "status": "owner-approved",
+      "scope": "palette A and experience plan",
+      "evidence": "User: SI, dale con los colores A"
+    },
+    {
+      "date": "2026-10-17",
+      "status": "proposed-for-review",
+      "scope": "scenographic opening, chapter rhythm, collection, detail, mobile navigation and visit preparation"
+    },
+    {
+      "date": "2026-10-18",
+      "status": "owner-approved",
+      "scope": "Composition and flow; refine thin typography and increase color presence",
+      "evidence": "Owner: está organizada y linda ... le falta un poco de color ... muy delgada ... Apruebo"
+    }
+  ],
+  "inspiration": [
+    {
+      "url": "https://21st.dev/@ishamsu/components/immersive-scroll-gallery",
+      "use": "Visual rhythm metadata only; no retrieved code or paid generation"
+    }
+  ],
+  "reuse": [
+    "Canonical API client and schema validation",
+    "Generated contracts",
+    "Catalog URL parameters",
+    "Model access validation and camera utilities"
+  ],
+  "constraints": [
+    "No embedded cultural records or assets",
+    "Live approved local API",
+    "No autoplay audio",
+    "One model renderer per route",
+    "Honor no_reuse",
+    "USD 0",
+    "Preserve canonical routes, contracts and Unity host; no Unity changes"
+  ]
+}

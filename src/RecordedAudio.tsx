@@ -1,13 +1,33 @@
-import { useEffect, useRef, useState } from 'react'
+import { exhibitionCopy as ui } from './exhibition-copy'
+import { useEffect, useId, useRef, useState } from 'react'
 import { api } from './api'
 import type { Resource } from './contracts'
 import { copy } from './interface-copy'
 import { activeCue, parseTimedText } from './timed-text'
 import type { Cue } from './timed-text'
 
-export function RecordedAudio({ element, title, resource, subtitles, downloadRestricted }: {
-  element: string; title: string; resource: Resource; subtitles: Resource | null; downloadRestricted: boolean
+function seekAudio(player: HTMLAudioElement | null, seconds: number) {
+  if (player) player.currentTime = seconds
+}
+
+export function RecordedAudio({ element, title, resource, subtitles, downloadRestricted, appearance = 'native' }: {
+  element: string; title: string; resource: Resource; subtitles: Resource | null; downloadRestricted: boolean; appearance?: 'native' | 'exhibition'
 }) {
+  const seekId = useId()
+  const [playing, setPlaying] = useState(false)
+  const [waiting, setWaiting] = useState(false)
+  const [canSeek, setCanSeek] = useState(false)
+  const [time, setTime] = useState(0)
+  const [duration, setDuration] = useState(resource.duration_seconds || 0)
+  function formatTime(value: number) { const safe = Number.isFinite(value) && value > 0 ? value : 0; return `${Math.floor(safe / 60)}:${Math.floor(safe % 60).toString().padStart(2, '0')}` }
+  async function togglePlayback() {
+    if (!audio.current) return
+    if (!audio.current.paused) audio.current.pause()
+    else {
+      setAudioFailed(false); setWaiting(true)
+      try { await audio.current.play() } catch { setWaiting(false); setAudioFailed(true) }
+    }
+  }
   const [cues, setCues] = useState<Cue[]>([])
   const [status, setStatus] = useState<'idle' | 'loading' | 'failed' | 'ready'>(subtitles ? 'loading' : 'idle')
   const [attempt, setAttempt] = useState(0)
@@ -42,16 +62,26 @@ export function RecordedAudio({ element, title, resource, subtitles, downloadRes
     }
   }, [follow, current])
   if (!resource.transcription) return <p>{copy.media.noAudioTranscript}</p>
-  const updateTime = () => setCurrent(activeCue(cues, audio.current?.currentTime ?? 0))
-  return <div>
+  const updateTime = () => { setTime(audio.current?.currentTime ?? 0); setCurrent(activeCue(cues, audio.current?.currentTime ?? 0)) }
+  return <div className={appearance === 'exhibition' ? 'narration' : undefined}>
     {/* Visible full transcription remains available when timed text is unavailable. */}
     {/* oxlint-disable-next-line jsx-a11y/media-has-caption */}
-    <audio key={audioAttempt} ref={audio} controls preload="none" aria-label={copy.media.audioLabel(title, resource.kind === 'narration')}
-      controlsList={downloadRestricted ? 'nodownload' : undefined} onTimeUpdate={updateTime} onSeeked={updateTime} onEnded={updateTime}
-      onError={() => { setAudioFailed(true); setFollow(false) }}>
+    <audio key={audioAttempt} ref={audio} controls={appearance === 'native'} preload="none" aria-label={copy.media.audioLabel(title, resource.kind === 'narration')}
+      controlsList={downloadRestricted ? 'nodownload' : undefined} onTimeUpdate={updateTime} onSeeked={updateTime} onEnded={() => { setPlaying(false); setWaiting(false); updateTime() }}
+      onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)} onPlaying={() => setWaiting(false)}
+      onWaiting={() => setWaiting(true)} onCanPlay={() => setWaiting(false)}
+      onLoadedMetadata={() => { const value = audio.current?.duration || 0; setDuration(Number.isFinite(value) ? value : 0); setCanSeek(true) }}
+      onError={() => { setAudioFailed(true); setFollow(false); setPlaying(false); setWaiting(false) }}>
       <source src={api.resourceUrl(element, resource.id)} type={resource.mime} />{copy.media.audioUnsupported}
     </audio>
-    {audioFailed && <p role="alert">{copy.media.audioFailed} <button type="button" onClick={() => { setAudioFailed(false); setAudioAttempt(value => value + 1) }}>{copy.common.retry}</button></p>}
+    {appearance === 'exhibition' && <div className="audio-main">
+      <button type="button" className="circle play" aria-label={`${playing ? ui.pause : ui.listen} ${title}`} disabled={waiting && !playing} onClick={() => void togglePlayback()}>{waiting && !playing ? '…' : playing ? 'Ⅱ' : '▶'}</button>
+      <div className="audio-info"><span className="eyebrow">{copy.common.narration}</span><strong>{title}</strong>
+        <label className="sr-only" htmlFor={seekId}>{ui.seekNarration}</label>
+        <input id={seekId} type="range" min="0" max={duration || 1} value={Math.min(time, duration || 1)} step="0.1" disabled={!canSeek || !duration} onChange={event => { seekAudio(audio.current, Number(event.target.value)); updateTime() }}/>
+      </div><span className="audio-time">{formatTime(time)} <span>/ {formatTime(duration)}</span></span>
+    </div>}
+    {audioFailed && <p role="alert">{copy.media.audioFailed} <button type="button" onClick={() => { setAudioFailed(false); setWaiting(false); setPlaying(false); setCanSeek(false); setTime(0); setAudioAttempt(value => value + 1) }}>{copy.common.retry}</button></p>}
     {status === 'loading' && <output>{copy.media.cuesLoading}</output>}
     {status === 'failed' && <p>{copy.media.cuesUnavailable} <button type="button" onClick={() => { setStatus('loading'); setAttempt(value => value + 1) }}>{copy.common.retry}</button></p>}
     {status === 'ready' && <>
@@ -65,6 +95,6 @@ export function RecordedAudio({ element, title, resource, subtitles, downloadRes
       </section>
       {/* oxlint-enable jsx-a11y/no-noninteractive-tabindex, jsx-a11y/no-noninteractive-element-interactions */}
     </>}
-    <details><summary>{copy.detail.transcription}</summary><p>{resource.transcription}</p></details>
+    <details className={appearance === 'exhibition' ? 'transcript' : undefined}><summary>{copy.detail.transcription}</summary><p>{resource.transcription}</p></details>
   </div>
 }

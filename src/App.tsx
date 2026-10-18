@@ -1,17 +1,15 @@
+import { ExhibitionHome, ExhibitionCollection, ExhibitionDetail, VisitPreparation, PublicShell, PageLifecycle } from './Exhibition'
 import { useCallback, useEffect, useState } from 'react'
-import { Link, NavLink, Route, Routes, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, Route, Routes, useNavigate, useSearchParams } from 'react-router-dom'
 import { api } from './api'
 import { parseSelection, parseClearedSelection, parsePointPresence, parseReturnToCatalog } from './contract-validation'
 import { UnityTour, type UnityInstance } from './UnityTour'
 import { confirmedSelection, isAvailableSelection, presenceForSelection } from './tour-selection'
 import { useApi } from './use-api'
 import type { PointPresence } from './contracts'
-import { Catalog } from './Catalog'
-import { Detail } from './Detail'
 import { Validator } from './Validator'
 import { ValidatorSessionProvider } from './validator-session'
 import { Guide } from './Guide'
-import { Home } from './Home'
 import { copy } from './interface-copy'
 import { presentation } from './presentation-config'
 
@@ -135,7 +133,6 @@ function TourPage() {
       })}><option value="">{copy.tour.choose}</option>{selectedPoint.elements.map(item => <option key={item.slug} value={item.slug}>{item.title}</option>)}</select></label>
       {element ? <Link className="button secondary" to={'/elementos/' + encodeURIComponent(element)}>{copy.tour.openDetail} <span aria-hidden="true">↗</span></Link> : <p>{copy.tour.noSelection}</p>}
       <output className="point-presence">{away ? (selectedElement?.has_narration ? copy.tour.awayNarrated : copy.tour.away) : ''}</output></section>}
-      {validPoint && element && <div className="tour-detail"><Detail elementId={element} /></div>}
       <div className="section-heading room-heading"><div><h2>{copy.tour.rooms}</h2><p>{copy.tour.roomHint}</p></div><Link to="/recorrido/texto">{copy.tour.text} <span aria-hidden="true">→</span></Link></div>
       <div className="room-list">{data.rooms.map((room) => <article key={room.key}>
         <span className="section-num">{copy.tour.room} {String(room.order + 1).padStart(2, '0')}</span><h3>{room.name}</h3>
@@ -144,36 +141,6 @@ function TourPage() {
           <span>{copy.tour.count(item.elements.length)}</span>
         </li>)}</ul>
       </article>)}</div>
-    </>}
-  </section>
-}
-
-function TextTour() {
-  const tourKey = presentation.tourKey
-  const [attempt, setAttempt] = useState(0)
-  const load = useCallback((signal: AbortSignal) => { void attempt; return api.tour(tourKey, signal) }, [tourKey, attempt])
-  const { data, error, loading } = useApi(load)
-  return <section className="page text-tour">
-    <p className="eyebrow">{copy.tour.textEyebrow}</p><h1>{copy.tour.textTitle}</h1>
-    <p className="page-intro">{copy.tour.textIntro}</p><Link className="back" to="/catalogo">{copy.common.backCatalog}</Link>
-    <Status loading={loading} error="" />
-    {error && <p className="status error" role="alert">{error} <button type="button" onClick={() => setAttempt(value => value + 1)}>{copy.common.retry}</button></p>}
-    {data && <>
-      <nav aria-label={copy.tour.roomNavigation} className="room-index">
-        {data.rooms.map((room, index) => <a key={room.key} href={'#room-' + index}>{room.name}</a>)}
-      </nav>
-      {data.rooms.map((room, index) => <section key={room.key} id={'room-' + index} className="text-room" aria-labelledby={'room-title-' + index}>
-        <h2 id={'room-title-' + index}>{room.name}</h2>
-        {room.short_description && <p>{room.short_description}</p>}
-        <ol>{room.points.map((point) => <li key={point.key}>
-          <h3>{point.name}</h3>
-          {point.elements.length ? <ul>{point.elements.map((element) => <li key={element.slug}>
-            <Link to={'/elementos/' + encodeURIComponent(element.slug)}>{element.title}</Link>
-            {element.has_narration && <> · <Link to={'/elementos/' + encodeURIComponent(element.slug) + '#narrations'}>{copy.tour.readNarration}</Link></>}
-          </li>)}</ul> : <p>{copy.tour.noContent}</p>}
-        </li>)}</ol>
-        <a href="#main-content">{copy.tour.top}</a>
-      </section>)}
     </>}
   </section>
 }
@@ -203,19 +170,17 @@ function NotFound() {
 }
 
 export default function App() {
-  const location = useLocation()
-  useEffect(() => {
-    if (!location.hash) {
-      window.scrollTo(0, 0)
-      document.getElementById('main-content')?.focus({ preventScroll: true })
-    }
-  }, [location.pathname, location.hash])
-  return <ValidatorSessionProvider><div className="site-shell" data-tone={location.pathname === '/' ? 'dark' : 'light'}>
-    <a className="skip-link" href="#main-content">{copy.site.skip}</a>
-    <header className="site-header"><Link className="brand" to="/"><span className="brand-mark" aria-hidden="true">MB</span><span>{copy.site.name}<span className="brand-sub">{copy.site.subtitle}</span></span></Link>
-      <nav aria-label={copy.site.navigation}><NavLink to="/" end>{copy.site.home}</NavLink><NavLink to="/catalogo">{copy.site.catalog}</NavLink><NavLink to="/recorrido">{copy.site.tour}</NavLink><NavLink to="/guia">{copy.guide.link}</NavLink></nav>
-    </header>
-    <main id="main-content" tabIndex={-1}><Routes><Route path="/" element={<Home />} /><Route path="/catalogo" element={<Catalog />} /><Route path="/elementos/:id" element={<Detail />} /><Route path="/recorrido" element={<TourPage />} /><Route path="/recorrido/texto" element={<TextTour />} /><Route path="/guia" element={<Guide />} /><Route path="/acerca" element={<About />} /><Route path="/privacidad" element={<Privacy />} /><Route path="/validador" element={<Validator />} /><Route path="/validador/:id" element={<Validator />} /><Route path="*" element={<NotFound />} /></Routes></main>
-    <footer><div><span className="footer-brand">{copy.site.name}</span><p>{copy.site.subtitle}</p></div><nav aria-label={copy.site.information}><Link to="/validador">{copy.site.validators}</Link><Link to="/acerca">{copy.site.about}</Link><Link to="/privacidad">{copy.site.privacy}</Link><Link to="/recorrido/texto">{copy.home.textTour}</Link></nav></footer>
-  </div></ValidatorSessionProvider>
+  return <ValidatorSessionProvider><PageLifecycle/><PublicShell><Routes>
+    <Route path="/" element={<ExhibitionHome/>}/>
+    <Route path="/catalogo" element={<ExhibitionCollection/>}/>
+    <Route path="/elementos/:id" element={<ExhibitionDetail/>}/>
+    <Route path="/recorrido" element={<div className="legacy-content"><TourPage/></div>}/>
+    <Route path="/recorrido/texto" element={<VisitPreparation/>}/>
+    <Route path="/guia" element={<div className="legacy-content"><Guide/></div>}/>
+    <Route path="/acerca" element={<div className="legacy-content"><About/></div>}/>
+    <Route path="/privacidad" element={<div className="legacy-content"><Privacy/></div>}/>
+    <Route path="/validador" element={<div className="legacy-content"><Validator/></div>}/>
+    <Route path="/validador/:id" element={<div className="legacy-content"><Validator/></div>}/>
+    <Route path="*" element={<div className="legacy-content"><NotFound/></div>}/>
+  </Routes></PublicShell></ValidatorSessionProvider>
 }

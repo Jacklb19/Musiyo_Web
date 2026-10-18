@@ -26,6 +26,7 @@ declare global { interface Window { createUnityInstance?: UnityFactory } }
 
 // A late startup must quit before another route or retry starts an engine.
 let engineTail = Promise.resolve()
+export function waitForUnityDisposal(): Promise<void> { return engineTail }
 class UnityLoadError extends Error {}
 
 export function UnityTour({ onReady }: { onReady: (instance: UnityInstance | null) => void }) {

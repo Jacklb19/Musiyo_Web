@@ -14,7 +14,7 @@ React y TypeScript para catálogo, fichas, recorrido libre y alternativa accesib
 
 `npm.cmd run lint`, `npm.cmd run typecheck`, `npm.cmd test`, `npm.cmd run contracts:check` y `npm.cmd run build` comprueban código, selecciones, contratos y compilación. En producción, sirve `/api/v1` bajo el mismo origen. Configuración en `.env.example`.
 
-La ficha carga modelos GLB bajo demanda con acceso temporal a la variante Web y controles de rotación, zoom y restablecimiento. Los decodificadores Draco se sirven localmente y se preparan al iniciar o compilar. El validador dispone de ingreso y corrección de textos. El guía por voz sigue pendiente. Los repositorios no contienen material cultural ni claves.
+La ficha carga modelos GLB al entrar en pantalla, con carga manual en conexiones lentas, con acceso temporal a la variante Web y controles de rotación, zoom y restablecimiento. Los decodificadores Draco se sirven localmente y se preparan al iniciar o compilar. El validador dispone de ingreso y corrección de textos. El guía por voz sigue pendiente. Los repositorios no contienen material cultural ni claves.
 
 ## Coordinación
 
@@ -22,9 +22,9 @@ Código y contratos en inglés; interfaz en español. El contenido y los recurso
 
 ## Visual presentation
 
-The React pages use shared tokens in `src/tokens.css` (Fraunces headings, DM Sans body, cream surfaces and gold actions) and neutral Spanish copy in `src/interface-copy.ts`. Cultural descriptions, counts, sources, credits and resources come from the API. Missing photographs have an explicit fallback; no cultural images or models are bundled in the source.
+The accepted exhibition uses palette A (night, carmine, green and amber), local OFL fonts (Bodoni Moda at weight 600 and optical size 16, Instrument Sans for reading), and shared tokens in `src/tokens.css` and `src/exhibition.css`. Neutral Spanish labels are centralized in `src/interface-copy.ts` and `src/exhibition-copy.ts`. Cultural descriptions, counts, sources, credits and resources come from the API. Missing photographs have an explicit fallback; no cultural images or models are bundled in the source.
 
-`VITE_EXHIBITION_CATEGORY` selects the published category displayed on the home page (default `mascaras`). This key and `VITE_TOUR_KEY` are validated. Models on the home page and detail pages load only after the visitor chooses to examine them, using the existing signed Web variant and local Draco decoder. Catalogue filters and search remain in the URL; Enter preserves search focus. Shared tour points have a selector for their available elements and a link to the full HTML detail.
+`VITE_EXHIBITION_CATEGORY` selects the published category displayed on the home page (default `mascaras`). This key and `VITE_TOUR_KEY` are validated. Models on the home page, catalogue spotlight and detail pages load only when visible, using the existing signed Web variant and local Draco decoder. Data saving or reported slow connections require an explicit press. Renderers are removed out of view and wait for Unity disposal before starting. `VITE_FEATURED_ELEMENT_SLUG` and `VITE_INTRODUCTION_SLUG` configure the accepted editorial selections, with validated record identifiers. Catalogue filters and search remain in the URL; Enter preserves search focus. Shared tour points have a selector for their available elements and a link to the full HTML detail.
 
 Check the home page, `/catalogo?category=mascaras`, an API-provided element detail and `/recorrido/texto` at desktop, tablet and mobile widths, including keyboard, empty results and retry. At mobile/tablet widths the tour offers HTML and does not mount Unity. The Web loading wrapper does not duplicate the Unity game menu.
 
