@@ -8,6 +8,7 @@ export function PageLifecycle() {
   const location = useLocation()
   const navigation = useNavigationType()
   const previousPath = useRef('')
+  const focusPath = useRef(location.pathname)
   useLayoutEffect(() => {
     const restore = navigation === 'POP' || location.state?.restoreCatalog
     const samePage = previousPath.current === location.pathname
@@ -40,7 +41,9 @@ export function PageLifecycle() {
     }
   }, [location.key, location.pathname, location.search, location.hash, location.state, navigation])
   useEffect(() => {
-    if (navigation !== 'POP') document.querySelector<HTMLElement>('main')?.focus({ preventScroll: true })
+    const changedPage = focusPath.current !== location.pathname
+    focusPath.current = location.pathname
+    if (changedPage && navigation !== 'POP') document.querySelector<HTMLElement>('main')?.focus({ preventScroll: true })
     document.title = location.pathname === '/' ? 'Musiyo Bëtsknaté · Carnaval del Perdón' : `${location.pathname.startsWith('/elementos') ? ui.pieceFallback : location.pathname === '/catalogo' ? ui.collection : ui.virtualVisit} · Musiyo Bëtsknaté`
   }, [location.pathname, navigation])
   useEffect(() => {
