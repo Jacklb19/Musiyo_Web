@@ -118,3 +118,7 @@ body { min-width: 320px; }
 
 h3 { font-family: var(--body); font-weight: 600; }
 .audio-info input { height: 28px; }
+
+/* WCAG 2.2 AA contrast on the green panels (audit 2026-10-20): small labels need 4.5:1, large text 3:1. */
+.collection-showcase .eyebrow { color: var(--paper); }
+.character-chapter em { color: #edba5d; }
