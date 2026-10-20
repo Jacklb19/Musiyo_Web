@@ -119,6 +119,23 @@ export interface GuideResponse {
   reason: "insufficient_evidence" | "provider_unavailable" | null
 }
 
+export interface GuideSpeech {
+  mime?: "audio/wav"
+  data_base64: string
+}
+
+export interface GuideTranscription {
+  schema_version?: 1
+  text: string
+}
+
+export interface GuideVoiceAnswer {
+  schema_version?: 1
+  response: GuideResponse
+  speech_status: "ready" | "disabled" | "unavailable" | "not_applicable"
+  audio: GuideSpeech | null
+}
+
 export interface Health {
   status: "ok"
 }
@@ -300,4 +317,16 @@ export interface ValidatorSession {
   authenticated: boolean
   user?: ValidatorProfile | null
   csrf_token?: string | null
+}
+
+export interface VoiceCapabilities {
+  schema_version?: 1
+  transcription: "disabled" | "configured"
+  synthesis: "disabled" | "configured"
+  processing?: "backend_local"
+  retention?: "request_only"
+  input_mime?: "audio/wav"
+  max_input_bytes: number
+  max_input_seconds: number
+  request_timeout_seconds: number
 }

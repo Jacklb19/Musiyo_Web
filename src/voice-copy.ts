@@ -1,0 +1,18 @@
+export const voiceCopy = {
+  title: 'Voz del guía',
+  notice: 'Si eliges voz, el audio se envía a la API del museo y se procesa en su equipo con motores locales. El micrófono solo se activa mientras grabas. El texto y el audio se usan solo durante la consulta; no se guardan ni se añaden al catálogo. Puedes cancelar en cualquier momento.',
+  consent: 'Acepto este procesamiento para mis consultas de voz durante esta visita.',
+  response: 'Solicitar también la respuesta en audio',
+  record: (seconds: number) => `Grabar pregunta (máximo ${seconds} s)`,
+  recording: 'Grabando. Pulsa «Detener y transcribir» cuando termines.',
+  stop: 'Detener y transcribir',
+  discard: 'Descartar grabación',
+  microphoneError: 'No fue posible usar el micrófono. Puedes escribir tu pregunta.',
+  upload: 'O transcribe una pregunta desde un archivo WAV (mono, PCM16, 16 kHz; máximo 30 s y 5 MB)',
+  review: 'Revisa la transcripción en el campo de pregunta antes de enviarla al guía.',
+  transcribing: 'Transcribiendo…',
+  transcriptionError: 'No fue posible transcribir el audio. Puedes escribir tu pregunta.',
+  cancel: 'Cancelar transcripción',
+  unavailable: 'No fue posible generar el audio. Puedes leer la respuesta y sus fuentes.',
+  audio: 'Escuchar la respuesta del guía',
+} as const

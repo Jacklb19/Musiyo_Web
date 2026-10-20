@@ -298,6 +298,9 @@ footer nav a:hover { color: var(--color-gold); text-decoration: underline; }
 .guide-context { display: flex; flex-wrap: wrap; gap: 12px 24px; font-size: 13px; margin-bottom: 28px; }
 .guide-context p { width: 100%; margin-bottom: 0; }
 .guide-context a { text-decoration: underline; }
+.guide-voice { font-size: 13px; margin-bottom: 28px; }
+.guide-voice label { display: flex; gap: 8px; align-items: flex-start; margin-top: 12px; }
+.guide-voice output { display: block; margin-top: 8px; }
 .guide-alternatives { flex-wrap: wrap; margin-top: 40px; gap: 12px; }
 @media (max-width: 600px) { .site-header nav { flex-wrap: wrap; gap: 8px 20px; } .guide-alternatives { flex-direction: column; align-items: flex-start; } }
 

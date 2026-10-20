@@ -2,6 +2,7 @@ import { parseCatalog, parseFacets, parseElement, parseTour, parseResourceAccess
 
 import { requestQuiz, requestQuizAnswer } from './quiz-client'
 import type { GuideQuizAnswer } from './contracts'
+import { parseVoiceAnswer, parseVoiceCapabilities, parseTranscription, voiceRequest } from './voice-client'
 import { requestGuide } from './guide-client'
 import { guideConfig } from './guide-config'
 import type { GuideQuestion, DetailCorrection } from './contracts'
@@ -36,6 +37,9 @@ async function validatorRequest(path: string, method = 'GET', body?: unknown, cs
 }
 
 export const api = {
+  voiceCapabilities: async (signal: AbortSignal) => parseVoiceCapabilities(await voiceRequest(base, '/guide/voice-capabilities', signal, 10000)),
+  guideVoiceAnswer: async (question: GuideQuestion, signal: AbortSignal) => parseVoiceAnswer(await voiceRequest(base, '/guide/voice-answers', signal, 60000, question)),
+  guideTranscription: async (audio: Blob, signal: AbortSignal) => parseTranscription(await voiceRequest(base, '/guide/transcriptions?schema_version=1', signal, 60000, audio)),
   quiz: (tourKey: string, signal: AbortSignal) => requestQuiz(base, tourKey, signal, guideConfig.requestTimeoutMs),
   quizAnswer: (answer: GuideQuizAnswer, signal: AbortSignal) => requestQuizAnswer(base, answer, signal, guideConfig.requestTimeoutMs),
   guideQuestion: (question: GuideQuestion, signal: AbortSignal) => requestGuide(base, question, signal, guideConfig.requestTimeoutMs),

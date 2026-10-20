@@ -1,8 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { api } from './api'
-import type { GuideResponse } from './contracts'
+import type { GuideResponse, GuideVoiceAnswer, VoiceCapabilities } from './contracts'
 import { GuideRequestError } from './guide-client'
+import { GuideVoiceInput } from './GuideVoiceInput'
+import { GuideAnswerAudio } from './GuideAnswerAudio'
+import { voiceCopy } from './voice-copy'
 import { copy } from './interface-copy'
 
 export function Guide({ elementSlug, embedded = false }: { elementSlug?: string; embedded?: boolean } = {}) {
@@ -13,6 +16,15 @@ export function Guide({ elementSlug, embedded = false }: { elementSlug?: string;
 }
 
 function GuideQuestionForm({ element, embedded }: { element: string | null; embedded: boolean }) {
+  const [capabilities, setCapabilities] = useState<VoiceCapabilities | null>(null)
+  const [voiceConsent, setVoiceConsent] = useState(false)
+  const [wantSpeech, setWantSpeech] = useState(false)
+  const [voiceResult, setVoiceResult] = useState<GuideVoiceAnswer | null>(null)
+  useEffect(() => {
+    const controller = new AbortController()
+    void api.voiceCapabilities(controller.signal).then(setCapabilities).catch(() => {})
+    return () => controller.abort()
+  }, [])
   const [question, setQuestion] = useState('')
   const [submitted, setSubmitted] = useState('')
   const [pending, setPending] = useState(false)
@@ -30,9 +42,15 @@ function GuideQuestionForm({ element, embedded }: { element: string | null; embe
     request.current = controller
     setPending(true)
     setResult(null)
+    setVoiceResult(null)
     setError('')
     setSubmitted(question.trim())
     try {
+      if (wantSpeech && voiceConsent && capabilities?.synthesis === 'configured') {
+        const voiced = await api.guideVoiceAnswer({ schema_version: 1, question: question.trim(), element_slug: element }, controller.signal)
+        if (!controller.signal.aborted) { setResult(voiced.response); setVoiceResult(voiced) }
+        return
+      }
       const response = await api.guideQuestion({ schema_version: 1, question: question.trim(), element_slug: element }, controller.signal)
       if (!controller.signal.aborted) setResult(response)
     } catch (failure) {
@@ -47,6 +65,7 @@ function GuideQuestionForm({ element, embedded }: { element: string | null; embe
     request.current?.abort()
     setPending(false)
     setSubmitted('')
+    setVoiceResult(null)
   }
 
   const Heading = embedded ? 'h2' : 'h1'
@@ -57,11 +76,21 @@ function GuideQuestionForm({ element, embedded }: { element: string | null; embe
       {element && <div className="guide-context"><p>{copy.guide.context}</p>
         <Link to={'/elementos/' + encodeURIComponent(element)}>{copy.common.openDetail}</Link>
         <Link to="/guia">{copy.guide.clearContext}</Link></div>}
+      {/* Voice stays hidden unless the backend reports a configured local engine; text is always available. */}
+      {capabilities && (capabilities.transcription === 'configured' || capabilities.synthesis === 'configured') && <details className="guide-voice">
+        <summary>{voiceCopy.title}</summary>
+          <p>{voiceCopy.notice}</p>
+          <label><input type="checkbox" checked={voiceConsent} disabled={pending} onChange={event => setVoiceConsent(event.target.checked)} />{voiceCopy.consent}</label>
+          {capabilities.synthesis === 'configured' && <label><input type="checkbox" checked={wantSpeech} disabled={!voiceConsent || pending}
+            onChange={event => setWantSpeech(event.target.checked)} />{voiceCopy.response}</label>}
+          {capabilities.transcription === 'configured' && <GuideVoiceInput key={String(voiceConsent)} capabilities={capabilities} consent={voiceConsent} disabled={pending}
+            onQuestion={text => { setQuestion(text); setResult(null); setVoiceResult(null); setError('') }} />}
+      </details>}
       <form className="guide-form" onSubmit={submit} aria-busy={pending}>
         <label htmlFor="guide-question">{copy.guide.question}</label>
         <textarea id="guide-question" value={question} rows={4} maxLength={500} readOnly={pending}
           aria-describedby="guide-question-hint" onChange={event => {
-            setQuestion(event.target.value); setResult(null); setError(''); setSubmitted('')
+            setQuestion(event.target.value); setResult(null); setVoiceResult(null); setError(''); setSubmitted('')
           }} required />
         <div className="guide-form-footer"><p id="guide-question-hint" className="field-hint">{copy.guide.hint}</p>
           <span className="guide-count" aria-hidden="true">{question.length}/500</span></div>
@@ -75,7 +104,9 @@ function GuideQuestionForm({ element, embedded }: { element: string | null; embe
         {result && <section className="guide-answer" aria-labelledby="guide-answer-title">
           <p className="guide-submitted">{submitted}</p>
           <h2 id="guide-answer-title">{copy.guide.resultTitle(result.status)}</h2>
-          {result.status === 'answered' ? <><p className="guide-answer-text">{result.answer}</p>
+          {result.status === 'answered' ? <><p id="guide-answer-text" className="guide-answer-text">{result.answer}</p>
+            {voiceResult?.audio && <GuideAnswerAudio answer={voiceResult} />}
+            {voiceResult?.speech_status === 'unavailable' && <output>{voiceCopy.unavailable}</output>}
             <h3>{copy.guide.sources}</h3><ul className="guide-citations">{result.citations.map(citation => <li key={citation.element_slug}>
               <Link to={'/elementos/' + encodeURIComponent(citation.element_slug)}>{citation.title} <span aria-hidden="true">↗</span></Link>
             </li>)}</ul><p className="field-hint">{copy.guide.sourceHint}</p></>
