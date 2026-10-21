@@ -169,6 +169,7 @@ export interface LoginRequest {
 export interface MuseumCredits {
   schema_version?: 1
   title: string
+  subtitle: string
   sections?: (CreditSection)[]
 }
 

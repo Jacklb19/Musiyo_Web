@@ -51,7 +51,7 @@ export function Credits() {
     <Status {...credits}/>
     {credits.data && <div className="credits-roll" ref={roll}>
       <div className="credits-track">
-        <header><p className="eyebrow">Musiyo Bëtsknaté</p><h1 id="credits-title">{credits.data.title}</h1><p>{ui.museumPurpose}</p></header>
+        <header><p className="eyebrow">{ui.creditsTitle}</p><h1 id="credits-title">{credits.data.title}</h1><p>{credits.data.subtitle}</p></header>
         {credits.data.sections?.map(section => <section key={section.key} className={`credits-section credits-${section.key}`}>
           <h2>{section.title}</h2>
           <ul>{section.lines.map((line, index) => <li key={index}>{line.role && <span className="credits-role">{line.role}</span>}<span className="credits-name">{line.text}</span></li>)}</ul>
