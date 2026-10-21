@@ -36,9 +36,13 @@ function keys(value: Record<string, unknown>, expected: string[]) {
 
 export function parseVoiceCapabilities(value: unknown): VoiceCapabilities {
   const item = record(value)
-  keys(item, ['schema_version', 'transcription', 'synthesis', 'processing', 'retention', 'input_mime', 'max_input_bytes', 'max_input_seconds', 'request_timeout_seconds'])
+  keys(item, ['schema_version', 'transcription', 'synthesis', 'processing', 'providers', 'retention', 'input_mime', 'max_input_bytes', 'max_input_seconds', 'request_timeout_seconds'])
+  const providers = item.providers
+  // External processing must name its providers so the notice can show them before consent.
+  if (!Array.isArray(providers) || providers.some(name => name !== 'Groq' && name !== 'ElevenLabs') || new Set(providers).size !== providers.length
+    || (item.processing === 'external_providers') !== (providers.length > 0)) throw new Error('Invalid voice providers')
   if (item.schema_version !== 1 || !['disabled', 'configured'].includes(String(item.transcription))
-    || !['disabled', 'configured'].includes(String(item.synthesis)) || item.processing !== 'backend_local'
+    || !['disabled', 'configured'].includes(String(item.synthesis)) || !['backend_local', 'external_providers'].includes(String(item.processing))
     || item.retention !== 'request_only' || item.input_mime !== 'audio/wav'
     || !Number.isInteger(item.max_input_bytes) || Number(item.max_input_bytes) < 1000 || Number(item.max_input_bytes) > 5000000
     || !Number.isInteger(item.max_input_seconds) || Number(item.max_input_seconds) < 1 || Number(item.max_input_seconds) > 30

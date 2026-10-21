@@ -20,7 +20,10 @@ test('voice capabilities mean configured, never engine or microphone readiness',
   const valid = fixture('voice_capabilities_disabled')
   assert.deepEqual(parseVoiceCapabilities(valid), valid)
   for (const patch of [{transcription:'ready'}, {retention:'permanent'}, {max_input_seconds:31},
-    {schema_version:true}, {max_input_bytes:5000001}, {processing:'external'}]) assert.throws(() => parseVoiceCapabilities({...valid,...patch}))
+    {schema_version:true}, {max_input_bytes:5000001}, {processing:'external'}, {processing:'external_providers'},
+    {providers:['OpenAI']}, {providers:['Groq']}, {providers:['Groq','Groq']}]) assert.throws(() => parseVoiceCapabilities({...valid,...patch}))
+  const external = fixture('voice_capabilities_external')
+  assert.deepEqual(parseVoiceCapabilities(external).providers, ['ElevenLabs', 'Groq'])
   assert.deepEqual(parseTranscription(fixture('guide_transcription')), fixture('guide_transcription'))
   assert.throws(() => parseTranscription({schema_version:1,text:'  '}))
 })

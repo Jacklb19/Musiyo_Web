@@ -160,9 +160,9 @@ function About() {
 function Privacy() {
   return <section className="page"><p className="eyebrow">Privacidad</p><h1>Tu visita y tus datos</h1>
     <div className="ficha"><p className="lead">Puedes consultar el catálogo, las fichas y el recorrido público sin crear una cuenta.</p>
-      <section><h2>Micrófono y guía</h2><p>La consulta por voz está en desarrollo. Cuando esté disponible, se solicitará tu aceptación antes de activar el micrófono y se identificará el servicio externo que procesa el audio. También podrás escribir tu pregunta.</p></section>
+      <section><h2>Guía y micrófono</h2><p>El guía busca la respuesta solo en las fichas autorizadas del museo. Para redactarla, tu pregunta y los fragmentos de fichas encontrados pueden enviarse a Groq, un servicio externo de inteligencia artificial; si no está disponible, el guía cita directamente el texto de la ficha. Si usas la voz, se te pedirá aceptación antes de activar el micrófono y se indicará qué servicios procesan el audio (Groq para entender la pregunta y ElevenLabs para la voz de la respuesta, cuando estén activos). Siempre puedes escribir tu pregunta.</p></section>
       <section><h2>Contenido y archivos</h2><p>Los créditos y restricciones de uso se indican en cada ficha. Poder consultar un material no implica permiso para reutilizarlo.</p></section>
-      <section><h2>Servicios externos</h2><p>Las funciones de voz y asistencia pueden utilizar servicios externos. Su información de tratamiento y conservación deberá estar disponible antes de habilitarlas.</p></section>
+      <section><h2>Servicios externos y conservación</h2><p>El museo no guarda tus preguntas, tus grabaciones ni las respuestas, y no las añade al catálogo. Los servicios externos aplican sus propias condiciones de tratamiento: Groq (groq.com) y ElevenLabs (elevenlabs.io). No incluyas datos personales en tus preguntas.</p></section>
     </div>
   </section>
 }

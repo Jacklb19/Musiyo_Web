@@ -3,7 +3,7 @@ export const copy = {
   guide: {
     eyebrow: 'Guía / consulta en texto', title: 'Pregúntale al guía',
     intro: 'Consulta las fichas autorizadas del museo. Las respuestas incluyen enlaces a sus fuentes.',
-    question: 'Tu pregunta', hint: 'Entre 3 y 500 caracteres. No incluyas datos personales.',
+    question: 'Tu pregunta', hint: 'Entre 3 y 500 caracteres. No incluyas datos personales: tu pregunta y los fragmentos de fichas que la responden pueden enviarse a un servicio externo de IA (Groq) para redactar la respuesta.',
     context: 'Esta consulta se limita a la ficha seleccionada.', clearContext: 'Consultar todo el catálogo autorizado',
     submit: 'Consultar', pending: 'Consultando las fichas…', cancel: 'Cancelar', sources: 'Fichas citadas',
     sourceHint: 'Abre las fichas para consultar sus fuentes, créditos y restricciones.',

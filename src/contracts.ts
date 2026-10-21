@@ -323,7 +323,8 @@ export interface VoiceCapabilities {
   schema_version?: 1
   transcription: "disabled" | "configured"
   synthesis: "disabled" | "configured"
-  processing?: "backend_local"
+  processing?: "backend_local" | "external_providers"
+  providers?: ("Groq" | "ElevenLabs")[]
   retention?: "request_only"
   input_mime?: "audio/wav"
   max_input_bytes: number

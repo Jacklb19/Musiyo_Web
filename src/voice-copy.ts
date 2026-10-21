@@ -1,6 +1,9 @@
 export const voiceCopy = {
   title: 'Voz del guía',
-  notice: 'Si eliges voz, el audio se envía a la API del museo y se procesa en su equipo con motores locales. El micrófono solo se activa mientras grabas. El texto y el audio se usan solo durante la consulta; no se guardan ni se añaden al catálogo. Puedes cancelar en cualquier momento.',
+  notice: (providers: readonly string[]) => (providers.length
+    ? `Si eliges voz, tu grabación se envía al servidor del museo y a ${providers.join(' y ')}, servicios externos que la transcriben o generan la voz de la respuesta.`
+    : 'Si eliges voz, tu grabación se envía al servidor del museo y se procesa allí con motores locales.')
+    + ' El micrófono solo se activa mientras grabas. El museo no guarda el audio ni el texto ni los añade al catálogo. Puedes cancelar en cualquier momento.',
   consent: 'Acepto este procesamiento para mis consultas de voz durante esta visita.',
   response: 'Solicitar también la respuesta en audio',
   record: (seconds: number) => `Grabar pregunta (máximo ${seconds} s)`,

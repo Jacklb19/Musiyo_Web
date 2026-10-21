@@ -79,7 +79,7 @@ function GuideQuestionForm({ element, embedded }: { element: string | null; embe
       {/* Voice stays hidden unless the backend reports a configured local engine; text is always available. */}
       {capabilities && (capabilities.transcription === 'configured' || capabilities.synthesis === 'configured') && <details className="guide-voice">
         <summary>{voiceCopy.title}</summary>
-          <p>{voiceCopy.notice}</p>
+          <p>{voiceCopy.notice(capabilities.providers ?? [])}</p>
           <label><input type="checkbox" checked={voiceConsent} disabled={pending} onChange={event => setVoiceConsent(event.target.checked)} />{voiceCopy.consent}</label>
           {capabilities.synthesis === 'configured' && <label><input type="checkbox" checked={wantSpeech} disabled={!voiceConsent || pending}
             onChange={event => setWantSpeech(event.target.checked)} />{voiceCopy.response}</label>}
