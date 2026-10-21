@@ -16,6 +16,8 @@ export const exhibitionCopy = {
   "checkSources": "Consulta la procedencia y las fuentes de esta ficha.",
   "loading": "Consultando el museo…",
   "consultSource": "Consultar fuente",
+  "references": "Referencias",
+  "reference": "Referencia",
   "consultPublication": "Consultar publicación",
   "correctRecord": "Corregir esta ficha",
   "creditsSources": "Créditos y fuentes",

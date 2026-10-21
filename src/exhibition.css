@@ -122,3 +122,6 @@ h3 { font-family: var(--body); font-weight: 600; }
 /* WCAG 2.2 AA contrast on the green panels (audit 2026-10-20): small labels need 4.5:1, large text 3:1. */
 .collection-showcase .eyebrow { color: var(--paper); }
 .character-chapter em { color: #edba5d; }
+/* Short references at the end of a record: reading text stays clean (owner decision 21/10/2026). */
+.note-marker{font-size:.62em;line-height:0;margin-left:.15em;vertical-align:super}.note-marker a{color:var(--carmine);font-weight:600;padding:0 .15em}.note-marker a:hover{text-decoration:underline}
+.record-references{margin-top:44px;padding-top:18px;border-top:1px solid rgb(33 23 36 / .15);font-size:12px;line-height:1.6;color:rgb(33 23 36 / .78)}.record-references .eyebrow{margin-bottom:10px;color:var(--night)}.record-references ol{margin:0;padding-left:1.4em;display:grid;gap:4px}.record-references li{scroll-margin-top:28px}.record-references li:target{color:var(--night);background:rgb(232 170 70 / .18)}.record-credits{margin:12px 0 0;font-style:italic}
