@@ -19,7 +19,7 @@ function Header() {
 }
 
 function Footer() {
-  return <footer className="site-footer"><div className="footer-top"><Link className="brand" to="/"><span>{ui.brandName}<span className="brand-dot">.</span></span><small>{ui.brandSubtitle}</small></Link><p>{ui.museumSubtitle}<br/>{ui.carnivalSubtitle}</p><Link className="underlined" to="/elementos/creditos-del-museo">{ui.creditsSources} <Arrow/></Link></div><div className="footer-bottom"><nav aria-label={ui.museumInformation}><Link to="/acerca">{ui.about}</Link><Link to="/privacidad">{ui.privacy}</Link><Link to="/validador">{ui.validators}</Link><Link to="/guia">{ui.guide}</Link></nav><span>{ui.sourcesNotice}</span></div></footer>
+  return <footer className="site-footer"><div className="footer-top"><Link className="brand" to="/"><span>{ui.brandName}<span className="brand-dot">.</span></span><small>{ui.brandSubtitle}</small></Link><p>{ui.museumSubtitle}<br/>{ui.carnivalSubtitle}</p><Link className="underlined" to="/creditos">{ui.creditsSources} <Arrow/></Link></div><div className="footer-bottom"><nav aria-label={ui.museumInformation}><Link to="/acerca">{ui.about}</Link><Link to="/privacidad">{ui.privacy}</Link><Link to="/validador">{ui.validators}</Link><Link to="/guia">{ui.guide}</Link></nav><span>{ui.sourcesNotice}</span></div></footer>
 }
 
 export function PublicShell({ children }: { children: ReactNode }) {

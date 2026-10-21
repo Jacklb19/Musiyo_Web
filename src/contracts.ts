@@ -38,6 +38,17 @@ export interface Credit {
   name: string
 }
 
+export interface CreditLine {
+  role?: string | null
+  text: string
+}
+
+export interface CreditSection {
+  key: "project" | "pieces" | "testimonies" | "media" | "sources" | "technology"
+  title: string
+  lines: (CreditLine)[]
+}
+
 export interface DetailCorrection {
   title?: string | null
   description?: string | null
@@ -153,6 +164,12 @@ export interface LastModified {
 export interface LoginRequest {
   username: string
   password: string
+}
+
+export interface MuseumCredits {
+  schema_version?: 1
+  title: string
+  sections?: (CreditSection)[]
 }
 
 export interface NamedTerm {

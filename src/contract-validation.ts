@@ -12,7 +12,8 @@ import catalogSchema from '../contracts/catalog.v1.schema.json' with { type: 'js
 import facetSchema from '../contracts/catalog-facet.v1.schema.json' with { type: 'json' }
 import accessSchema from '../contracts/resource-access.v1.schema.json' with { type: 'json' }
 import sessionSchema from '../contracts/validator-session.v1.schema.json' with { type: 'json' }
-import type { GuideResponse, CatalogFacet, CatalogPage, Element, PointPresence, ResourceAccess, ReturnToCatalog, SelectionConfirmed, SelectionCleared, Tour, ValidatorSession } from './contracts.ts'
+import creditsSchema from '../contracts/museum-credits.v1.schema.json' with { type: 'json' }
+import type { GuideResponse, CatalogFacet, CatalogPage, Element, MuseumCredits, PointPresence, ResourceAccess, ReturnToCatalog, SelectionConfirmed, SelectionCleared, Tour, ValidatorSession } from './contracts.ts'
 
 type Schema = {
   $ref?: string
@@ -135,6 +136,11 @@ export function parseFacets(value: unknown): CatalogFacet[] {
   if (!Array.isArray(value) || !value.every((item) => matches(item, facetSchema as Schema, facetSchema as Schema)) ||
       new Set(value.map((item: CatalogFacet) => item.slug)).size !== value.length) throw new Error('Filtros incompatibles')
   return value as CatalogFacet[]
+}
+
+export function parseMuseumCredits(value: unknown): MuseumCredits {
+  if (!matches(value, creditsSchema as Schema, creditsSchema as Schema)) throw new Error('Créditos incompatibles')
+  return value as MuseumCredits
 }
 
 export function parseResourceAccess(value: unknown): ResourceAccess {

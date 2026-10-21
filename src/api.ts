@@ -1,4 +1,4 @@
-import { parseCatalog, parseFacets, parseElement, parseTour, parseResourceAccess, parseValidatorSession } from './contract-validation'
+import { parseCatalog, parseFacets, parseElement, parseMuseumCredits, parseTour, parseResourceAccess, parseValidatorSession } from './contract-validation'
 
 import { requestQuiz, requestQuizAnswer } from './quiz-client'
 import type { GuideQuizAnswer } from './contracts'
@@ -52,6 +52,7 @@ export const api = {
   catalog: async (params: URLSearchParams, signal?: AbortSignal) => parseCatalog(await get<unknown>('/catalog?' + params.toString(), signal)),
   categories: async (signal?: AbortSignal) => parseFacets(await get<unknown>('/categories', signal)),
   collections: async (signal?: AbortSignal) => parseFacets(await get<unknown>('/collections', signal)),
+  credits: async (signal?: AbortSignal) => parseMuseumCredits(await get<unknown>('/credits?schema_version=1', signal)),
   elements: async (signal?: AbortSignal) => {
     const items = await get<unknown>('/elements', signal)
     if (!Array.isArray(items)) throw new Error('Catálogo incompatible')
