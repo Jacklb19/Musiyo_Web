@@ -11,7 +11,7 @@ export const voiceCopy = {
   stop: 'Detener y transcribir',
   discard: 'Descartar grabación',
   microphoneError: 'No fue posible usar el micrófono. Puedes escribir tu pregunta.',
-  upload: 'O transcribe una pregunta desde un archivo WAV (mono, PCM16, 16 kHz; máximo 30 s y 5 MB)',
+  upload: 'O elige una grabación de tu pregunta (archivo WAV de hasta 30 segundos)',
   review: 'Revisa la transcripción en el campo de pregunta antes de enviarla al guía.',
   transcribing: 'Transcribiendo…',
   transcriptionError: 'No fue posible transcribir el audio. Puedes escribir tu pregunta.',
