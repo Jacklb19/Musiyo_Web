@@ -59,3 +59,7 @@ test('blocks citing the same work share one reference number', () => {
       { id: 'c', kind: 'interpretation', text: 'C.', source_id: 'g', context: 'Lectura etnográfica.' }] }
   assert.deepEqual(blockNotes(element).map((note) => note.number), [1, 1, 2])
 })
+
+test('a credit without a role shows only the name, as in Unity', () => {
+  assert.equal(creditLine({ credits: [{ role: null, name: 'Cabildo indígena' }, { role: 'Texto', name: 'Autor' }] }), 'Cabildo indígena · Texto: Autor')
+})

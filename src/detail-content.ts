@@ -61,5 +61,5 @@ export function blockNotes(element: Element): BlockNote[] {
 }
 
 export function creditLine(element: Element): string {
-  return (element.credits || []).map((credit) => `${credit.role}: ${credit.name}`).join(' · ')
+  return (element.credits || []).map((credit) => credit.role ? `${credit.role}: ${credit.name}` : credit.name).join(' · ')
 }
