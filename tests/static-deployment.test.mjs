@@ -27,3 +27,10 @@ test('SPA routing never converts missing player or API resources into HTML', () 
     assert.equal(handler({ request: { uri } }).uri, uri)
   }
 })
+
+test('web fonts, the tab icon and the share image are served with their own types', () => {
+  assert.equal(objectMetadata('fonts/BodoniModa-latin.woff').content_type, 'font/woff')
+  assert.equal(objectMetadata('fonts/InstrumentSans.ttf').content_type, 'font/ttf')
+  assert.equal(objectMetadata('favicon.svg').content_type, 'image/svg+xml')
+  assert.equal(objectMetadata('og-image.png').content_type, 'image/png')
+})

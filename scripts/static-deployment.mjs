@@ -9,7 +9,7 @@ export function objectMetadata(key) {
   const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8',
     '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.wasm': 'application/wasm',
     '.data': 'application/octet-stream', '.unityweb': 'application/octet-stream', '.png': 'image/png',
-    '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.webp': 'image/webp', '.woff2': 'font/woff2' }[extname(uncompressed)] || 'application/octet-stream'
+    '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.webp': 'image/webp', '.woff2': 'font/woff2', '.woff': 'font/woff', '.ttf': 'font/ttf' }[extname(uncompressed)] || 'application/octet-stream'
   const immutable = key.startsWith('assets/') && /[-.][A-Za-z0-9_-]{8,}\./.test(key)
   return { content_type: mime, content_encoding: encoding,
     cache_control: key.endsWith('unity-build.json') || key === 'index.html' ? 'no-store'
