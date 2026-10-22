@@ -9,16 +9,17 @@ import './visit-quiz.css'
 
 export function VisitQuiz({ heading: Heading = 'h2' }: { heading?: 'h1' | 'h2' }) {
   const [open, setOpen] = useState(false)
+  const [finished, setFinished] = useState(false)
   const start = useRef<HTMLButtonElement>(null)
   function close() { setOpen(false); requestAnimationFrame(() => start.current?.focus()) }
   return <section className="visit-quiz" aria-labelledby="visit-quiz-title">
     <p className="eyebrow">{text.eyebrow}</p><Heading id="visit-quiz-title">{text.title}</Heading><p>{text.intro}</p>
-    <button ref={start} className="pill dark" aria-expanded={open} aria-controls="visit-quiz-content" hidden={open} onClick={() => setOpen(true)}>{text.start} <span aria-hidden="true">↗</span></button>
-    {open && <div id="visit-quiz-content"><QuizQuestions/><button className="underlined quiz-close" onClick={close}>{text.close}</button></div>}
+    <button ref={start} className="pill dark" aria-expanded={open} aria-controls="visit-quiz-content" hidden={open} onClick={() => setOpen(true)}>{text.start} <span aria-hidden="true">→</span></button>
+    {open && <div id="visit-quiz-content"><QuizQuestions onFinished={setFinished}/>{!finished && <button className="underlined quiz-close" onClick={close}>{text.close}</button>}</div>}
   </section>
 }
 
-function QuizQuestions() {
+function QuizQuestions({ onFinished }: { onFinished: (finished: boolean) => void }) {
   const [quiz, setQuiz] = useState<GuideQuiz | null>(null)
   const [attempt, setAttempt] = useState(0)
   const [index, setIndex] = useState(0)
@@ -32,6 +33,8 @@ function QuizQuestions() {
   const heading = useRef<HTMLLegendElement>(null)
   const remaining = Math.max(0, Math.ceil((retryAt - now) / 1000))
   const question = quiz?.questions[index]
+  const finished = !!quiz && quiz.questions.length > 0 && !question
+  useEffect(() => onFinished(finished), [finished, onFinished])
   useEffect(() => {
     if (!retryAt) return
     const timer = window.setInterval(() => { const instant = Date.now(); setNow(instant); if (instant >= retryAt) window.clearInterval(timer) }, 500)
@@ -72,12 +75,16 @@ function QuizQuestions() {
     {!quiz && busy && <output>{text.loading}</output>}
     {!quiz && !busy && !error && <button className="pill secondary" disabled={remaining > 0} onClick={reload}>{text.retry}</button>}
     {quiz && quiz.questions.length === 0 && <output>{text.empty}</output>}
-    {quiz && quiz.questions.length > 0 && !question && <div aria-live="polite"><h3>{text.done}</h3><p>{text.doneText}</p><Link className="underlined" to="/catalogo">Volver al catálogo ↗</Link></div>}
+    {quiz && quiz.questions.length > 0 && !question && <div aria-live="polite" className="quiz-done"><h3>{text.done}</h3><p>{text.doneText}</p><div className="quiz-actions"><Link className="pill dark" to="/creditos">{text.credits} <span aria-hidden="true">→</span></Link><Link className="underlined" to="/catalogo">{text.collection} <span aria-hidden="true">→</span></Link></div></div>}
     {question && <><p className="quiz-progress">{text.progress(index + 1, quiz!.questions.length)}</p>
       <form onSubmit={submit}><fieldset disabled={busy || !!answer || remaining > 0}><legend ref={heading} tabIndex={-1}>{question.text}</legend>
-        {question.options.map(item => <label className="quiz-option" key={item.id}><input type="radio" name="quiz-option" value={item.id} checked={option === item.id} onChange={() => setOption(item.id)} required/><span>{item.text}</span></label>)}
+        {question.options.map(item => {
+          // Only the visitor's own choice is marked: green when it matches the source, neutral otherwise.
+          const chosen = !!answer && option === item.id
+          return <label className={`quiz-option${chosen ? (answer.correct ? ' is-match' : ' is-different') : ''}`} key={item.id}><input type="radio" name="quiz-option" value={item.id} checked={option === item.id} onChange={() => setOption(item.id)} required/><span>{item.text}</span>{chosen && <em className="quiz-mark">{answer.correct ? text.matchMark : text.choiceMark}</em>}</label>
+        })}
       </fieldset>{!answer && <div className="quiz-actions"><button className="pill dark" disabled={!option || busy || remaining > 0}>{busy ? text.sending : text.check}</button><button className="underlined" type="button" disabled={busy} onClick={next}>{text.skip}</button></div>}</form>
-      {answer && <div className="quiz-feedback" aria-live="polite"><h3>{answer.correct ? text.correct : text.incorrect}</h3><p>{answer.explanation}</p><details><summary>{text.evidence}</summary><blockquote>{answer.citation.quote}</blockquote><p>{answer.source.reference}</p></details><Link className="underlined" to={'/elementos/' + encodeURIComponent(answer.citation.element_slug)}>{text.source} ↗</Link></div>}
+      {answer && <div className="quiz-feedback" aria-live="polite"><h3>{answer.correct ? text.correct : text.incorrect}</h3><p>{answer.explanation}</p><details><summary>{text.evidence}</summary><blockquote>{answer.citation.quote}</blockquote><p>{answer.source.reference}</p></details><Link className="underlined" to={'/elementos/' + encodeURIComponent(answer.citation.element_slug)}>{text.source} <span aria-hidden="true">→</span></Link></div>}
       {answer && <button className="pill dark" onClick={next}>{text.next} <span aria-hidden="true">→</span></button>}
     </>}
   </div>

@@ -4,24 +4,27 @@ import { useEffect, useId, useRef, useState } from 'react'
 import type { ModelViewerElement } from '@google/model-viewer'
 import type { Resource } from './contracts'
 import { api } from './api'
-import { initialOrbit, initialFieldOfView, nextCameraOrbit, webModelResourceId, validateModelAccess } from './model-controls'
+import { initialOrbit, initialFieldOfView, letWheelScrollPage, nextCameraOrbit, webModelResourceId, validateModelAccess } from './model-controls'
 
 function shouldLoadAutomatically() {
   const connection = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection
   return shouldAutoLoadModel(connection)
 }
 
-export function ModelStage({ resource, title, large = false }: { resource: Resource; title: string; large?: boolean }) {
+export function ModelStage({ resource, title, large = false, poster }: { resource: Resource; title: string; large?: boolean; poster?: string }) {
   const container = useRef<HTMLDivElement>(null)
   const viewer = useRef<ModelViewerElement | null>(null)
   const radius = useRef(1)
   const instructions = useId()
   const [visible, setVisible] = useState(false)
-  const [enabled, setEnabled] = useState(shouldLoadAutomatically)
+  // On phones the opening piece waits for the visitor too: it is the heaviest download of the home page.
+  const [enabled, setEnabled] = useState(() => shouldLoadAutomatically() && !(large && matchMedia('(max-width: 767px)').matches))
   const [attempt, setAttempt] = useState(0)
   const [status, setStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle')
   const [progress, setProgress] = useState(0)
   const resourceId = webModelResourceId(resource)
+
+  useEffect(() => container.current ? letWheelScrollPage(container.current) : undefined, [])
 
   useEffect(() => {
     const target = container.current
@@ -117,6 +120,7 @@ export function ModelStage({ resource, title, large = false }: { resource: Resou
   }
 
   return <div className={`model-stage ${large ? 'model-stage--hero' : ''}`}>
+    {poster && status !== 'ready' && <img className="model-poster" src={poster} alt="" decoding="async" />}
     <div className="model-host" ref={container} aria-busy={status === 'loading'} />
     {(!enabled || status === 'error') && <div className="model-message"><p>{status === 'error' ? 'El modelo no pudo cargarse.' : 'El modelo se carga cuando tú elijas.'}</p><button className="pill" onClick={() => { setEnabled(true); setStatus('loading'); setProgress(0); setAttempt(value => value + 1) }}>{status === 'error' ? 'Reintentar modelo' : 'Cargar modelo 3D'}</button></div>}
     {enabled && (status === 'idle' || status === 'loading') && <output className="model-loading"><span className="loading-ring"/><span>Cargando pieza{progress > 0 ? ` · ${Math.round(progress * 100)} %` : '…'}</span></output>}
@@ -128,6 +132,6 @@ export function ModelStage({ resource, title, large = false }: { resource: Resou
       <button className="circle" disabled={status !== 'ready'} aria-label="Alejar pieza" onClick={() => move('farther')}>−</button>
       <button className="circle" disabled={status !== 'ready'} aria-label="Restablecer vista" onClick={() => move('reset')}>⟲</button>
     </div>
-    <p id={instructions} className="model-instructions">Arrastra para girar · Pellizca para acercar</p>
+    <p id={instructions} className="model-instructions">Arrastra para girar · Pellizca o usa + y − para acercar</p>
   </div>
 }

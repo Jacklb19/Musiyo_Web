@@ -7,6 +7,8 @@ import { GuideVoiceInput } from './GuideVoiceInput'
 import { GuideAnswerAudio } from './GuideAnswerAudio'
 import { voiceCopy } from './voice-copy'
 import { copy } from './interface-copy'
+import { exhibitionCopy as ui } from './exhibition-copy'
+import { Arrow } from './exhibition-ui'
 
 export function Guide({ elementSlug, embedded = false }: { elementSlug?: string; embedded?: boolean } = {}) {
   const [params] = useSearchParams()
@@ -16,6 +18,8 @@ export function Guide({ elementSlug, embedded = false }: { elementSlug?: string;
 }
 
 function GuideQuestionForm({ element, embedded }: { element: string | null; embedded: boolean }) {
+  // A question limited to one record can be asked again of the whole museum.
+  const [scope, setScope] = useState(element)
   const [capabilities, setCapabilities] = useState<VoiceCapabilities | null>(null)
   const [voiceConsent, setVoiceConsent] = useState(false)
   const [wantSpeech, setWantSpeech] = useState(false)
@@ -36,6 +40,10 @@ function GuideQuestionForm({ element, embedded }: { element: string | null; embe
 
   async function submit(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault()
+    await ask(scope)
+  }
+
+  async function ask(target: string | null) {
     if (length < 3 || length > 500 || pending) return
     const controller = new AbortController()
     request.current?.abort()
@@ -47,11 +55,11 @@ function GuideQuestionForm({ element, embedded }: { element: string | null; embe
     setSubmitted(question.trim())
     try {
       if (wantSpeech && voiceConsent && capabilities?.synthesis === 'configured') {
-        const voiced = await api.guideVoiceAnswer({ schema_version: 1, question: question.trim(), element_slug: element }, controller.signal)
+        const voiced = await api.guideVoiceAnswer({ schema_version: 1, question: question.trim(), element_slug: target }, controller.signal)
         if (!controller.signal.aborted) { setResult(voiced.response); setVoiceResult(voiced) }
         return
       }
-      const response = await api.guideQuestion({ schema_version: 1, question: question.trim(), element_slug: element }, controller.signal)
+      const response = await api.guideQuestion({ schema_version: 1, question: question.trim(), element_slug: target }, controller.signal)
       if (!controller.signal.aborted) setResult(response)
     } catch (failure) {
       if (!controller.signal.aborted) setError(failure instanceof GuideRequestError
@@ -73,9 +81,11 @@ function GuideQuestionForm({ element, embedded }: { element: string | null; embe
     <p className="eyebrow">{copy.guide.eyebrow}</p><Heading>{copy.guide.title}</Heading>
     <p className="page-intro">{copy.guide.intro}</p>
     <div className="guide-reading">
-      {element && <div className="guide-context"><p>{copy.guide.context}</p>
-        <Link to={'/elementos/' + encodeURIComponent(element)}>{copy.common.openDetail}</Link>
-        <Link to="/guia">{copy.guide.clearContext}</Link></div>}
+      {scope ? <div className="guide-context"><p>{copy.guide.context}</p>
+        {!embedded && <Link to={'/elementos/' + encodeURIComponent(scope)}>{copy.common.openDetail}</Link>}
+        <button type="button" className="text-button" disabled={pending} onClick={() => { setScope(null); setResult(null); setVoiceResult(null) }}>{copy.guide.clearContext}</button></div>
+        : element && <div className="guide-context"><p>{copy.guide.wholeMuseum}</p>
+        <button type="button" className="text-button" disabled={pending} onClick={() => { setScope(element); setResult(null); setVoiceResult(null) }}>{copy.guide.backToRecord}</button></div>}
       {/* Voice stays hidden unless the backend reports a configured local engine; text is always available. */}
       {capabilities && (capabilities.transcription === 'configured' || capabilities.synthesis === 'configured') && <details className="guide-voice">
         <summary>{voiceCopy.title}</summary>
@@ -89,7 +99,9 @@ function GuideQuestionForm({ element, embedded }: { element: string | null; embe
       <form className="guide-form" onSubmit={submit} aria-busy={pending}>
         <label htmlFor="guide-question">{copy.guide.question}</label>
         <textarea id="guide-question" value={question} rows={4} maxLength={500} readOnly={pending}
-          aria-describedby="guide-question-hint" onChange={event => {
+          aria-describedby="guide-question-hint" onKeyDown={event => {
+            if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) { event.preventDefault(); event.currentTarget.form?.requestSubmit() }
+          }} onChange={event => {
             setQuestion(event.target.value); setResult(null); setVoiceResult(null); setError(''); setSubmitted('')
           }} required />
         <div className="guide-form-footer"><p id="guide-question-hint" className="field-hint">{copy.guide.hint}</p>
@@ -103,21 +115,23 @@ function GuideQuestionForm({ element, embedded }: { element: string | null; embe
         {error && <p className="status error" role="alert">{error}</p>}
         {result && <section className="guide-answer" aria-labelledby="guide-answer-title">
           <p className="guide-submitted">{submitted}</p>
-          <h2 id="guide-answer-title">{copy.guide.resultTitle(result.status)}</h2>
+          <h2 id="guide-answer-title">{copy.guide.resultTitle(result.status, !!scope)}</h2>
           {result.status === 'answered' ? <><p id="guide-answer-text" className="guide-answer-text">{result.answer}</p>
             {voiceResult?.audio && <GuideAnswerAudio answer={voiceResult} />}
             {voiceResult?.speech_status === 'unavailable' && <output>{voiceCopy.unavailable}</output>}
             <h3>{copy.guide.sources}</h3><ul className="guide-citations">{result.citations.map(citation => <li key={citation.element_slug}>
-              <Link to={'/elementos/' + encodeURIComponent(citation.element_slug)}>{citation.title} <span aria-hidden="true">↗</span></Link>
+              <Link to={'/elementos/' + encodeURIComponent(citation.element_slug)}>{citation.title} <Arrow/></Link>
             </li>)}</ul><p className="field-hint">{copy.guide.sourceHint}</p></>
-            : <p>{result.status === 'abstained' ? copy.guide.abstained : copy.guide.unavailable}</p>}
+            : result.status === 'abstained' ? <><p>{scope ? copy.guide.abstainedRecord : copy.guide.abstained}</p>
+              {scope && <button className="pill dark" type="button" onClick={() => { setScope(null); void ask(null) }}>{copy.guide.searchEverywhere} <Arrow/></button>}</>
+            : <p>{copy.guide.unavailable}</p>}
         </section>}
       </div>
     </div>
-    <nav className="guide-alternatives" aria-label={copy.guide.alternatives}>
-      <Link className="button secondary" to="/catalogo">{copy.site.catalog}</Link>
-      <Link className="button secondary" to="/recorrido">{copy.site.tour}</Link>
-      <Link className="button secondary" to="/recorrido/texto">{copy.home.textTour}</Link>
-    </nav>
+    {!embedded && <nav className="guide-alternatives" aria-label={copy.guide.alternatives}>
+      <Link className="button secondary" to="/catalogo">{ui.collection}</Link>
+      <Link className="button secondary visit-3d-link" to="/recorrido">{ui.museum3d}</Link>
+      <Link className="button secondary" to="/recorrido/texto">{ui.textRooms}</Link>
+    </nav>}
   </section>
 }

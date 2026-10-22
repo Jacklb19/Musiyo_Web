@@ -160,7 +160,7 @@ function About() {
     <div className="ficha"><p className="lead">Un museo virtual para explorar contenidos sobre el Carnaval del Perdón del Valle de Sibundoy.</p>
       <section><h2>Una visita libre</h2><p>Puedes elegir tu propio camino, volver a una sala y consultar las fichas. La ruta sugerida pasa por Llegada, Bienvenida, Personajes, Instrumentos y Danza, Fogón y Mirador.</p></section>
       <section><h2>Fuentes y créditos</h2><p>Cada ficha presenta sus fuentes, créditos y restricciones disponibles. Los testimonios, la información documentada y las interpretaciones se muestran por separado. Las referencias a los pueblos Kamëntsá e Inga conservan su identificación propia.</p></section>
-      <section><h2>Formas de explorar</h2><p>El catálogo y las fichas pueden consultarse en computador y celular. El recorrido 3D requiere un computador con WebGL 2; <Link to="/recorrido/texto">la alternativa en texto</Link> permite explorar las salas sin cargar el entorno 3D.</p></section>
+      <section><h2>Formas de explorar</h2><p>La colección y las fichas pueden consultarse en computador y celular. El museo 3D requiere un computador con un navegador reciente; <Link to="/recorrido/texto">las salas en texto</Link> permiten recorrer el museo en cualquier dispositivo.</p></section>
     </div>
   </section>
 }

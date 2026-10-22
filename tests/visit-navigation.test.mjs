@@ -31,3 +31,16 @@ test('room reading lists each record once when the shared tour assigns it to mul
   assert.equal(input.length, 3)
   assert.equal(uniqueElements(input)[0], first)
 })
+
+test('the text rooms open the requested room or else the first one with published records', async () => {
+  const { defaultRoomKey, recordCount } = await import('../src/visit-navigation.ts')
+  const rooms = [{ key: 'arrival', points: [{ elements: [] }] }, { key: 'welcome', points: [{ elements: [] }, { elements: [{}] }] }, { key: 'hearth', points: [] }]
+  assert.equal(defaultRoomKey(rooms, null), 'welcome')
+  assert.equal(defaultRoomKey(rooms, 'hearth'), 'hearth')
+  assert.equal(defaultRoomKey(rooms, 'unknown'), 'welcome')
+  assert.equal(defaultRoomKey([{ key: 'empty', points: [] }], null), 'empty')
+  assert.equal(defaultRoomKey([], null), '')
+  assert.equal(recordCount(1), '1 ficha')
+  assert.equal(recordCount(0), '0 fichas')
+  assert.equal(recordCount(3), '3 fichas')
+})

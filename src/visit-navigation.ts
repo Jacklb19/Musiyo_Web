@@ -29,3 +29,13 @@ export function uniqueElements<T extends { slug: string }>(items: readonly T[]):
     return true
   })
 }
+
+// Opening a room without published records first left visitors on an empty screen.
+export function defaultRoomKey(rooms: readonly { key: string; points: readonly { elements: readonly unknown[] }[] }[], requested: string | null): string {
+  if (requested && rooms.some(room => room.key === requested)) return requested
+  return (rooms.find(room => room.points.some(point => point.elements.length > 0)) || rooms[0])?.key || ''
+}
+
+export function recordCount(count: number): string {
+  return `${count} ${count === 1 ? 'ficha' : 'fichas'}`
+}

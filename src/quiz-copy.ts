@@ -8,6 +8,8 @@ export const quizCopy = {
   correct: 'Tu respuesta coincide con lo documentado.', incorrect: 'Vamos a mirar lo que explica la fuente.',
   source: 'Consultar la ficha y su fuente', evidence: 'Fragmento de apoyo',
   done: 'Gracias por compartir este momento.', doneText: 'Puedes volver a las piezas, consultar sus fuentes o continuar tu visita a tu ritmo.',
+  credits: 'Ver los créditos del museo', collection: 'Volver a la colección',
+  matchMark: '✓ Coincide con la fuente', choiceMark: 'Tu respuesta',
   failure: 'No se pudo consultar la encuesta. Puedes volver a intentarlo o continuar tu visita.',
   unavailable: 'Esta pregunta dejó de estar disponible. Vuelve a cargar las preguntas vigentes.',
   rateLimit: (seconds: number) => `Espera ${seconds} segundos antes de volver a consultar.`,

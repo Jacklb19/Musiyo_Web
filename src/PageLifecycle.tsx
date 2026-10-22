@@ -1,4 +1,4 @@
-import { exhibitionCopy as ui } from './exhibition-copy'
+import { pageTitle } from './page-titles'
 import { useEffect, useLayoutEffect, useRef } from 'react'
 import { useLocation, useNavigationType } from 'react-router-dom'
 
@@ -44,7 +44,7 @@ export function PageLifecycle() {
     const changedPage = focusPath.current !== location.pathname
     focusPath.current = location.pathname
     if (changedPage && navigation !== 'POP') document.querySelector<HTMLElement>('main')?.focus({ preventScroll: true })
-    document.title = location.pathname === '/' ? 'Musiyo Bëtsknaté · Carnaval del Perdón' : `${location.pathname.startsWith('/elementos') ? ui.pieceFallback : location.pathname === '/catalogo' ? ui.collection : ui.virtualVisit} · Musiyo Bëtsknaté`
+    document.title = pageTitle(location.pathname)
   }, [location.pathname, navigation])
   useEffect(() => {
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return

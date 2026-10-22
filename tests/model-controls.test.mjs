@@ -31,3 +31,21 @@ test('camera buttons retain elevation and bounded positive distance after user g
   assert.equal(parse('closer', 0.01)[2], 3 * 0.4)
   assert.equal(parse('farther', 100)[2], 7.5)
 })
+
+test('the wheel scrolls the page and only a pinch or Ctrl+wheel zooms the piece', async () => {
+  const { wheelZoomsModel, letWheelScrollPage } = await import('../src/model-controls.ts')
+  assert.equal(wheelZoomsModel({ ctrlKey: false, metaKey: false }), false)
+  assert.equal(wheelZoomsModel({ ctrlKey: true, metaKey: false }), true)
+  assert.equal(wheelZoomsModel({ ctrlKey: false, metaKey: true }), true)
+  const listeners = new Map()
+  const host = { addEventListener: (name, listener, options) => listeners.set(name, { listener, options }), removeEventListener: (name) => listeners.delete(name) }
+  const remove = letWheelScrollPage(host)
+  const { listener, options } = listeners.get('wheel')
+  assert.equal(options.capture, true)
+  let stopped = 0
+  listener({ ctrlKey: false, metaKey: false, stopPropagation: () => stopped++ })
+  listener({ ctrlKey: true, metaKey: false, stopPropagation: () => stopped++ })
+  assert.equal(stopped, 1)
+  remove()
+  assert.equal(listeners.has('wheel'), false)
+})

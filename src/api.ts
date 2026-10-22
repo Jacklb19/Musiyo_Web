@@ -16,7 +16,7 @@ const base = (import.meta.env.VITE_API_BASE_URL || '/api/v1').replace(/\/$/, '')
 async function get<T>(path: string, signal?: AbortSignal, method = 'GET'): Promise<T> {
   const response = await fetch(base + path, { signal, method })
   if (!response.ok) {
-    throw new Error(response.status === 404 ? 'Contenido no disponible' : 'No fue posible consultar la API')
+    throw new ApiError(response.status, response.status === 404 ? 'Contenido no disponible' : 'No fue posible consultar la API')
   }
   return response.json() as Promise<T>
 }
