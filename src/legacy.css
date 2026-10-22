@@ -312,3 +312,12 @@ footer nav a:hover { color: var(--color-gold); text-decoration: underline; }
 .timed-reading p { margin: 0 0 .75rem; padding: .4rem .6rem; border-inline-start: 3px solid transparent; }
 .timed-reading p[aria-current="true"] { border-inline-start-color: currentColor; font-weight: 600; background: var(--color-background); }
 }
+/* Full screen tour: the whole host fills the screen and the canvas takes every pixel but the exit button. */
+.unity-host { position: relative; scroll-margin-top: 8px; }
+.tour-page .unity-canvas { height: max(420px, calc(100dvh - 104px - 72px)); }
+.unity-fullscreen { position: absolute; top: 28px; right: 28px; z-index: 2; margin: 0; background: rgb(0 0 0 / .55); backdrop-filter: blur(4px); }
+.room-only-3d { color: var(--color-muted); font-size: 14px; margin: 8px 0 0; }
+.unity-host:fullscreen { position: relative; margin: 0; padding: 0; border: 0; border-radius: 0; display: flex; flex-direction: column; background: #000; }
+.unity-host:fullscreen .unity-canvas { flex: 1; width: 100vw; height: auto; min-height: 0; border-radius: 0; }
+.unity-host:fullscreen .unity-fullscreen { top: 12px; right: 12px; }
+.unity-host:fullscreen .tour-controls, .unity-host:fullscreen > p { display: none; }

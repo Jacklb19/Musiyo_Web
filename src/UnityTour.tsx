@@ -31,6 +31,8 @@ class UnityLoadError extends Error {}
 
 export function UnityTour({ onReady }: { onReady: (instance: UnityInstance | null) => void }) {
   const canvas = useRef<HTMLCanvasElement>(null)
+  const host = useRef<HTMLDivElement>(null)
+  const [fullscreen, setFullscreen] = useState(false)
   const keyboardNavigation = useRef(false)
   const [attempt, setAttempt] = useState(0)
   const [progress, setProgress] = useState(0)
@@ -83,6 +85,9 @@ export function UnityTour({ onReady }: { onReady: (instance: UnityInstance | nul
         if (cancelled) { try { await created.Quit() } finally { release?.() }; return }
         instance = created
         setLoaded(true)
+        // Bring the whole canvas into view so the museum fits the screen below the site header.
+        requestAnimationFrame(() => host.current?.scrollIntoView({
+          block: 'start', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }))
         onReady(created)
       } catch (reason) {
         script?.remove()
@@ -100,7 +105,22 @@ export function UnityTour({ onReady }: { onReady: (instance: UnityInstance | nul
     }
   }, [attempt, onReady])
 
-  return <div className="unity-host">
+  useEffect(() => {
+    // Track the browser state: Esc or the browser's own controls can leave full screen at any time.
+    const sync = () => setFullscreen(document.fullscreenElement === host.current && host.current !== null)
+    document.addEventListener('fullscreenchange', sync)
+    return () => document.removeEventListener('fullscreenchange', sync)
+  }, [])
+
+  const toggleFullscreen = async () => {
+    try {
+      if (document.fullscreenElement) await document.exitFullscreen()
+      else await host.current?.requestFullscreen({ navigationUI: 'hide' })
+      canvas.current?.focus()
+    } catch { /* The browser refused; the tour keeps working in the page. */ }
+  }
+
+  return <div className="unity-host" ref={host}>
     {!loaded && !error && <output className="unity-loading"><span className="eyebrow">{copy.site.name}</span><span>{copy.tour.loading}</span><progress max={100} value={progress} aria-label={copy.tour.loading}>{progress}%</progress><span>{progress}%</span></output>}
     {error && <div role="alert"><p>{error}</p><button className="button secondary" onClick={() => {
       setError(''); setProgress(0); setLoaded(false); setAttempt(attempt + 1)
@@ -114,6 +134,8 @@ export function UnityTour({ onReady }: { onReady: (instance: UnityInstance | nul
           && ['Tab', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(event.key)) event.preventDefault()
       }}
       aria-label={copy.tour.canvasLabel} hidden={!loaded || !!error} />
+    {loaded && document.fullscreenEnabled && <button type="button" className="button secondary unity-fullscreen"
+      onClick={() => { void toggleFullscreen() }} aria-pressed={fullscreen}>{fullscreen ? copy.tour.exitFullscreen : copy.tour.fullscreen}</button>}
     {loaded && <details className="tour-controls"><summary>{copy.tour.controlsTitle}</summary><p>{copy.tour.controls}</p></details>}
     <p><Link to="/recorrido/texto">{copy.tour.text}</Link></p>
   </div>
