@@ -78,7 +78,13 @@ export function RecordedAudio({ element, title, resource, subtitles, downloadRes
       <button type="button" className="circle play" aria-label={`${playing ? ui.pause : ui.listen} ${title}`} disabled={waiting && !playing} onClick={() => void togglePlayback()}>{waiting && !playing ? '…' : playing ? 'Ⅱ' : '▶'}</button>
       <div className="audio-info"><span className="eyebrow">{copy.common.narration}</span><strong>{title}</strong>
         <label className="sr-only" htmlFor={seekId}>{ui.seekNarration}</label>
-        <input id={seekId} type="range" min="0" max={duration || 1} value={Math.min(time, duration || 1)} step="0.1" disabled={!canSeek || !duration} onChange={event => { seekAudio(audio.current, Number(event.target.value)); updateTime() }}/>
+        <input id={seekId} type="range" min="0" max={duration || 1} value={Math.min(time, duration || 1)} step="any" aria-valuetext={`${formatTime(time)} de ${formatTime(duration)}`} disabled={!canSeek || !duration} onChange={event => { seekAudio(audio.current, Number(event.target.value)); updateTime() }}
+          onKeyDown={event => {
+            // Arrow keys move five seconds; the native step would move a tenth of a second.
+            const shift = { ArrowRight: 5, ArrowUp: 5, ArrowLeft: -5, ArrowDown: -5 }[event.key]
+            if (!shift) return
+            event.preventDefault(); seekAudio(audio.current, Math.max(0, Math.min(duration, time + shift))); updateTime()
+          }}/>
       </div><span className="audio-time">{formatTime(time)} <span>/ {formatTime(duration)}</span></span>
     </div>}
     {audioFailed && <p role="alert">{copy.media.audioFailed} <button type="button" onClick={() => { setAudioFailed(false); setWaiting(false); setPlaying(false); setCanSeek(false); setTime(0); setAudioAttempt(value => value + 1) }}>{copy.common.retry}</button></p>}
@@ -95,6 +101,7 @@ export function RecordedAudio({ element, title, resource, subtitles, downloadRes
       </section>
       {/* oxlint-enable jsx-a11y/no-noninteractive-tabindex, jsx-a11y/no-noninteractive-element-interactions */}
     </>}
-    <details className={appearance === 'exhibition' ? 'transcript' : undefined}><summary>{copy.detail.transcription}</summary><p>{resource.transcription}</p></details>
+    {/* The synchronized reader already shows the whole text; the plain transcript is its fallback. */}
+    {status !== 'ready' && <details className={appearance === 'exhibition' ? 'transcript' : undefined}><summary>{copy.detail.transcription}</summary><p>{resource.transcription}</p></details>}
   </div>
 }
