@@ -13,7 +13,7 @@ import facetSchema from '../contracts/catalog-facet.v1.schema.json' with { type:
 import accessSchema from '../contracts/resource-access.v1.schema.json' with { type: 'json' }
 import sessionSchema from '../contracts/validator-session.v1.schema.json' with { type: 'json' }
 import creditsSchema from '../contracts/museum-credits.v1.schema.json' with { type: 'json' }
-import type { GuideResponse, CatalogFacet, CatalogPage, Element, MuseumCredits, PointPresence, ResourceAccess, ReturnToCatalog, SelectionConfirmed, SelectionCleared, Tour, ValidatorSession } from './contracts.ts'
+import type { GuideResponse, CatalogFacet, CatalogPage, Element, MuseumCredits, PointPresence, RegistrationAvailability, ResourceAccess, ReturnToCatalog, SelectionConfirmed, SelectionCleared, Tour, ValidatorSession } from './contracts.ts'
 
 type Schema = {
   $ref?: string
@@ -150,6 +150,12 @@ export function parseResourceAccess(value: unknown): ResourceAccess {
   try { url = new URL(access.url, 'https://api.invalid') } catch { throw new Error('URL de recurso incompatible') }
   if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password) throw new Error('URL de recurso incompatible')
   return access
+}
+
+export function parseRegistration(value: unknown): RegistrationAvailability {
+  if (!isRecord(value) || value.schema_version !== 1 || typeof value.enabled !== 'boolean' || Object.keys(value).length !== 2)
+    throw new Error('Registro incompatible')
+  return value as unknown as RegistrationAvailability
 }
 
 export function parseValidatorSession(value: unknown): ValidatorSession {

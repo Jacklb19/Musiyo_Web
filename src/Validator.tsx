@@ -6,7 +6,71 @@ import { useApi } from './use-api'
 import { useValidatorSession } from './validator-session'
 import { changedCorrection, correctionDraft, editableInterpretations } from './validator-correction'
 
-function Login() {
+// Access page: sign in, or create an account with the invitation code the museum's owner shares.
+function Access() {
+  const [mode, setMode] = useState<'login' | 'register'>('login')
+  const availability = useApi(useCallback((signal: AbortSignal) => api.registration(signal), []))
+  const canRegister = availability.data?.enabled === true
+  return <div className="validator-access">
+    {canRegister && <div className="validator-tabs" role="tablist" aria-label="Acceso de validadores">
+      <button type="button" role="tab" id="tab-login" aria-selected={mode === 'login'} aria-controls="panel-access" onClick={() => setMode('login')}>Iniciar sesión</button>
+      <button type="button" role="tab" id="tab-register" aria-selected={mode === 'register'} aria-controls="panel-access" onClick={() => setMode('register')}>Crear cuenta</button>
+    </div>}
+    <div id="panel-access" role={canRegister ? 'tabpanel' : undefined} aria-labelledby={canRegister ? (mode === 'login' ? 'tab-login' : 'tab-register') : undefined}>
+      {mode === 'register' && canRegister ? <Register /> : <Login canRegister={canRegister} />}
+    </div>
+  </div>
+}
+
+function Register() {
+  const { register } = useValidatorSession()
+  const [error, setError] = useState('')
+  const [busy, setBusy] = useState(false)
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (busy) return
+    const form = event.currentTarget
+    const data = new FormData(form)
+    const password = String(data.get('password') || '')
+    if (password !== String(data.get('confirm') || '')) { setError('Las contraseñas no coinciden.'); return }
+    setBusy(true)
+    setError('')
+    try {
+      await register({ name: String(data.get('name') || '').trim(), username: String(data.get('username') || '').trim(),
+        password, invitation_code: String(data.get('invitation') || '').trim() })
+    } catch (reason) { setError(reason instanceof Error ? reason.message : 'No fue posible crear la cuenta') }
+    finally {
+      for (const name of ['password', 'confirm', 'invitation']) {
+        const input = form.elements.namedItem(name)
+        if (input instanceof HTMLInputElement) input.value = ''
+      }
+      setBusy(false)
+    }
+  }
+  return <div className="validator-login">
+    <p>Crea tu cuenta con el código de invitación que te entregó el responsable del museo. Como validador podrás corregir el título, la descripción y las interpretaciones de las fichas.</p>
+    <form className="validator-form" onSubmit={submit} aria-busy={busy}>
+      <label htmlFor="register-name">Nombre completo</label>
+      <input id="register-name" name="name" autoComplete="name" required minLength={2} maxLength={120} disabled={busy} />
+      <label htmlFor="register-username">Usuario</label>
+      <input id="register-username" name="username" autoComplete="username" required minLength={3} maxLength={100}
+        pattern="[A-Za-z0-9][A-Za-z0-9._\-]{2,99}" aria-describedby="register-username-hint" disabled={busy} />
+      <p id="register-username-hint" className="field-hint">Letras, números, punto o guion; sin espacios.</p>
+      <label htmlFor="register-password">Contraseña</label>
+      <input id="register-password" name="password" type="password" autoComplete="new-password" required minLength={12} maxLength={1024}
+        aria-describedby="register-password-hint" disabled={busy} />
+      <p id="register-password-hint" className="field-hint">Al menos 12 caracteres.</p>
+      <label htmlFor="register-confirm">Repite la contraseña</label>
+      <input id="register-confirm" name="confirm" type="password" autoComplete="new-password" required minLength={12} maxLength={1024} disabled={busy} />
+      <label htmlFor="register-invitation">Código de invitación</label>
+      <input id="register-invitation" name="invitation" type="password" autoComplete="off" required maxLength={256} disabled={busy} />
+      {error && <p className="status error" role="alert">{error}</p>}
+      <button className="button primary" disabled={busy} type="submit">{busy ? 'Creando cuenta…' : 'Crear cuenta'}</button>
+    </form>
+  </div>
+}
+
+function Login({ canRegister }: { canRegister: boolean }) {
   const { signIn } = useValidatorSession()
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
@@ -26,7 +90,7 @@ function Login() {
     }
   }
   return <div className="validator-login">
-    <p>Ingresa con la cuenta que te entregó el responsable del museo.</p>
+    <p>{canRegister ? 'Ingresa con tu usuario y contraseña de validador.' : 'Ingresa con la cuenta que te entregó el responsable del museo.'}</p>
     <form className="validator-form" onSubmit={submit} aria-busy={busy}>
       <label htmlFor="validator-username">Usuario</label>
       <input id="validator-username" name="username" autoComplete="username" required maxLength={100} disabled={busy} />
@@ -122,6 +186,6 @@ export function Validator() {
       <div className="validator-session"><p>Sesión de {session.user?.name}</p><button type="button" className="button secondary" onClick={logout} disabled={exiting}>{exiting ? 'Cerrando…' : 'Cerrar sesión'}</button></div>
       {exitError && <p className="status error" role="alert">{exitError}</p>}
       {id ? <CorrectionEditor id={id} /> : <div className="ficha"><p className="lead">Selecciona una ficha publicada en el catálogo y pulsa «Corregir ficha».</p><Link className="button primary" to="/catalogo">Abrir catálogo</Link></div>}
-    </> : <Login />)}
+    </> : <Access />)}
   </section>
 }
