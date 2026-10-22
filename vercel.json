@@ -5,7 +5,7 @@
   "outputDirectory": "dist",
   "rewrites": [
     { "source": "/api/:path*", "destination": "https://musiyo-api.onrender.com/api/:path*" },
-    { "source": "/unity/:path*", "destination": "https://TU-PROYECTO.supabase.co/storage/v1/object/public/unity/:path*" },
+    { "source": "/unity/:path*", "destination": "https://yglwsjzajclfxzvhhkho.supabase.co/storage/v1/object/public/unity/:path*" },
     { "source": "/((?!api/|unity/|assets/|fonts/|model-decoders/).*)", "destination": "/index.html" }
   ],
   "headers": [
