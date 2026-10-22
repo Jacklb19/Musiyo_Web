@@ -4,14 +4,17 @@ export const copy = {
     eyebrow: 'Guía / consulta en texto', title: 'Pregúntale al guía',
     intro: 'Consulta las fichas autorizadas del museo. Las respuestas incluyen enlaces a sus fuentes.',
     question: 'Tu pregunta', hint: 'Entre 3 y 500 caracteres. No incluyas datos personales: tu pregunta y los fragmentos de fichas que la responden pueden enviarse a un servicio externo de IA (Groq) para redactar la respuesta.',
-    context: 'Esta consulta se limita a la ficha seleccionada.', clearContext: 'Consultar todo el catálogo autorizado',
+    context: 'Esta consulta se limita a esta ficha.', clearContext: 'Preguntar a todo el museo',
+    wholeMuseum: 'Esta consulta busca en todas las fichas del museo.', backToRecord: 'Preguntar solo sobre esta ficha',
+    searchEverywhere: 'Buscar en todo el museo',
     submit: 'Consultar', pending: 'Consultando las fichas…', cancel: 'Cancelar', sources: 'Fichas citadas',
     sourceHint: 'Abre las fichas para consultar sus fuentes, créditos y restricciones.',
-    abstained: 'No tengo información validada suficiente para responder. Puedes consultar las fichas o reformular tu pregunta.',
+    abstained: 'Las fichas del museo no dicen esto, y el guía solo responde con lo que está en ellas. Prueba con otras palabras o explora la colección.',
+    abstainedRecord: 'Esta ficha no habla de eso. Puedo buscar la respuesta en todas las fichas del museo.',
     unavailable: 'El guía no está disponible en este momento. El catálogo, las fichas y el recorrido siguen funcionando.',
     transportError: 'No fue posible consultar el guía. Puedes reintentar o continuar con el catálogo y el recorrido.',
     alternatives: 'Continuar la visita', link: 'Guía textual', askRecord: 'Preguntar sobre esta ficha',
-    resultTitle: (status: string) => status === 'answered' ? 'Respuesta con fuentes' : status === 'abstained' ? 'Falta información validada' : 'Guía no disponible',
+    resultTitle: (status: string, scoped = false) => status === 'answered' ? 'Respuesta con fuentes' : status === 'abstained' ? (scoped ? 'No lo encontré en esta ficha' : 'No encontré esto en las fichas') : 'Guía no disponible',
     requestError: (status: number | null, retryAfterSeconds = 60) => status === 429 ? `Demasiadas preguntas. Espera ${retryAfterSeconds} segundos antes de volver a intentar.`
       : status === 422 ? 'Revisa tu pregunta: debe tener entre 3 y 500 caracteres.'
       : status === 408 ? 'La consulta tardó demasiado. Puedes reintentar o continuar la visita.'

@@ -90,3 +90,11 @@ test('guide bounds response body reading and discards cancelled completions', as
       return fixture('guide_answered')
     } })), error => error.name === 'AbortError')
 })
+
+test('an abstention reads as a search result, not as an error', async () => {
+  const { copy } = await import('../src/interface-copy.ts')
+  assert.equal(copy.guide.resultTitle('abstained', true), 'No lo encontré en esta ficha')
+  assert.equal(copy.guide.resultTitle('abstained'), 'No encontré esto en las fichas')
+  assert.equal(copy.guide.resultTitle('answered'), 'Respuesta con fuentes')
+  assert.ok(!Object.values(copy.guide).some((value) => typeof value === 'string' && value.includes('Falta información validada')))
+})
