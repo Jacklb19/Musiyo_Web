@@ -2,7 +2,7 @@ import { useEffect, useId, useRef, useState } from 'react'
 import type { ModelViewerElement } from '@google/model-viewer'
 import { api } from './api'
 import type { Resource } from './contracts'
-import { initialFieldOfView, initialOrbit, nextCameraOrbit, validateModelAccess, webModelResourceId } from './model-controls'
+import { initialFieldOfView, initialOrbit, letWheelScrollPage, nextCameraOrbit, validateModelAccess, webModelResourceId } from './model-controls'
 import type { CameraAction } from './model-controls'
 
 export function ModelViewer({ resource, title }: { resource: Resource; title: string }) {
@@ -15,6 +15,8 @@ export function ModelViewer({ resource, title }: { resource: Resource; title: st
   const [progress, setProgress] = useState(0)
   const [error, setError] = useState('')
   const resourceId = webModelResourceId(resource)
+
+  useEffect(() => host.current ? letWheelScrollPage(host.current) : undefined, [])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -113,7 +115,7 @@ export function ModelViewer({ resource, title }: { resource: Resource; title: st
   }
 
   return <div className="model-viewer">
-    <p id={instructions}>Arrastra para rotar; usa la rueda o pellizca para acercar y alejar. También puedes usar los botones con el teclado. La ficha permanece disponible.</p>
+    <p id={instructions}>Arrastra para rotar; pellizca o usa los botones para acercar y alejar. También puedes usar los botones con el teclado. La ficha permanece disponible.</p>
     {status === 'loading' && <div className="model-progress"><output aria-live="polite">Cargando modelo 3D…</output><progress value={progress} max={1} aria-label="Carga del modelo 3D" /></div>}
     {status === 'error' && <p className="status error" role="alert">{error} <button type="button" onClick={() => { setStatus('loading'); setProgress(0); setError(''); setAttempt((value) => value + 1) }}>Reintentar modelo</button></p>}
     <div className="model-canvas" ref={host} hidden={status === 'error'} aria-busy={status === 'loading'} />

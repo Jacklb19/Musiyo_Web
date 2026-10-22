@@ -29,3 +29,15 @@ export function nextCameraOrbit(orbit: CameraOrbit, action: CameraAction, initia
   const radius = Math.min(initialRadius * 2.5, Math.max(initialRadius * 0.4, orbit.radius * scale))
   return `${theta}rad ${orbit.phi}rad ${radius}m`
 }
+
+// The wheel scrolls the page, as visitors expect; zoom stays on the buttons, the touch pinch and the
+// trackpad pinch, which browsers report as a wheel event with the Ctrl key.
+export function wheelZoomsModel(event: { ctrlKey: boolean; metaKey: boolean }): boolean {
+  return event.ctrlKey || event.metaKey
+}
+
+export function letWheelScrollPage(host: HTMLElement): () => void {
+  const listener = (event: WheelEvent) => { if (!wheelZoomsModel(event)) event.stopPropagation() }
+  host.addEventListener('wheel', listener, { capture: true })
+  return () => host.removeEventListener('wheel', listener, { capture: true })
+}
