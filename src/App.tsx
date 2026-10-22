@@ -21,6 +21,11 @@ function Status({ loading, error }: { loading: boolean; error: string }) {
   return null
 }
 
+// Visitors know a point by what it shows, not by its internal number ("Punto 1").
+function pointLabel(point: { name: string; elements: { title: string }[] }) {
+  return point.elements.length ? point.elements.map(item => item.title).join(' · ') : point.name
+}
+
 function TourPage() {
   const tourKey = presentation.tourKey
   const [attempt, setAttempt] = useState(0)
@@ -139,10 +144,12 @@ function TourPage() {
       <div className="section-heading room-heading"><div><h2>{copy.tour.rooms}</h2><p>{copy.tour.roomHint}</p></div><Link to="/recorrido/texto">{copy.tour.text} <span aria-hidden="true">→</span></Link></div>
       <div className="room-list">{data.rooms.map((room) => <article key={room.key}>
         <span className="section-num">{copy.tour.room} {String(room.order + 1).padStart(2, '0')}</span><h3>{room.name}</h3>
-        <ul>{room.points.map((item) => <li key={item.key}>
-          <Link to={'/recorrido?point=' + encodeURIComponent(item.key)}>{item.name}</Link>
-          <span>{copy.tour.count(item.elements.length)}</span>
-        </li>)}</ul>
+        {room.points.some(item => item.elements.length > 0)
+          ? <ul>{room.points.filter(item => item.elements.length > 0).map((item) => <li key={item.key}>
+            <Link to={'/recorrido?point=' + encodeURIComponent(item.key)}>{pointLabel(item)}</Link>
+            <span>{copy.tour.count(item.elements.length)}</span>
+          </li>)}</ul>
+          : <p className="room-only-3d">{copy.tour.roomOnly3d}</p>}
       </article>)}</div>
     </>}
   </section>
