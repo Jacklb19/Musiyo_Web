@@ -16,6 +16,5 @@ export function ModelSection({ resource, title, index, embedded = false }: { res
       {open && <ModelViewer resource={resource} title={title} />}
     </>}
     {resource.credit && <p>{copy.common.credit}: {resource.credit}</p>}
-    {resource.provenance && <p>{copy.common.provenance}: {resource.provenance}</p>}
   </section>
 }

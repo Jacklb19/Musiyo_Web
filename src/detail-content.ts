@@ -63,3 +63,8 @@ export function blockNotes(element: Element): BlockNote[] {
 export function creditLine(element: Element): string {
   return (element.credits || []).map((credit) => credit.role ? `${credit.role}: ${credit.name}` : credit.name).join(' · ')
 }
+
+// Visitors read each resource's public credit once; provenance is an internal production log.
+export function publicCredits(resources: readonly Resource[]): string[] {
+  return [...new Set(resources.map((resource) => resource.credit?.trim() || '').filter(Boolean))]
+}

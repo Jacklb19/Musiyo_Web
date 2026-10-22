@@ -63,3 +63,15 @@ test('blocks citing the same work share one reference number', () => {
 test('a credit without a role shows only the name, as in Unity', () => {
   assert.equal(creditLine({ credits: [{ role: null, name: 'Cabildo indígena' }, { role: 'Texto', name: 'Autor' }] }), 'Cabildo indígena · Texto: Autor')
 })
+
+test('visitors see each public credit once and never the internal provenance log', async () => {
+  const { publicCredits } = await import('../src/detail-content.ts')
+  const resources = [
+    { id: 'narration', credit: 'Narración del museo.', provenance: 'Notas internas de producción.' },
+    { id: 'subtitles', credit: 'Narración del museo.', provenance: 'Otra nota interna.' },
+    { id: 'image', credit: ' ', provenance: 'SHA256 interno' },
+    { id: 'model', credit: 'Captura y digitalización.' },
+  ]
+  assert.deepEqual(publicCredits(resources), ['Narración del museo.', 'Captura y digitalización.'])
+  assert.ok(publicCredits(resources).every((line) => !line.includes('interna')))
+})

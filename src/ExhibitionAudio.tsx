@@ -9,8 +9,6 @@ export function ExhibitionAudio({ slug, resource, resources, title }: {
   return <div id="narrations">
     <RecordedAudio key={resource.id} element={slug} title={title} resource={resource}
       subtitles={subtitlesFor(resource, resources)} downloadRestricted appearance="exhibition"/>
-    <details className="audio-credits"><summary>{ui.creditsProvenance}</summary>{resource.credit && <p className="media-credit">{resource.credit}</p>}
-    {resource.provenance && <p className="media-credit">{resource.provenance}</p>}
-    </details>
+    {resource.credit && <details className="audio-credits"><summary>{ui.credit}</summary><p className="media-credit">{resource.credit}</p></details>}
   </div>
 }
