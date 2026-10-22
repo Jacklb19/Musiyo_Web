@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
 import { api, ApiError } from './api'
-import type { ValidatorSession } from './contracts'
+import type { RegistrationRequest, ValidatorSession } from './contracts'
 
 const anonymous: ValidatorSession = { schema_version: 1, authenticated: false, user: null, csrf_token: null }
 type SessionContextValue = {
@@ -9,6 +9,7 @@ type SessionContextValue = {
   error: string
   refresh: () => void
   signIn: (username: string, password: string) => Promise<void>
+  register: (details: RegistrationRequest) => Promise<void>
   signOut: () => Promise<void>
   expire: () => void
 }
@@ -47,6 +48,14 @@ export function ValidatorSessionProvider({ children }: { children: ReactNode }) 
     setError('')
   }
 
+  async function register(details: RegistrationRequest) {
+    await api.register(details)
+    const verified = await api.session()
+    if (!verified.authenticated) throw new Error('La cuenta se creó, pero el navegador no conservó la sesión segura. Abre el sitio mediante HTTPS o localhost e inicia sesión.')
+    setSession(verified)
+    setError('')
+  }
+
   async function signOut() {
     if (session?.csrf_token) {
       try { await api.logout(session.csrf_token) }
@@ -55,7 +64,7 @@ export function ValidatorSessionProvider({ children }: { children: ReactNode }) 
     setSession(anonymous)
   }
 
-  return <SessionContext value={{ session, loading, error, refresh, signIn, signOut, expire }}>{children}</SessionContext>
+  return <SessionContext value={{ session, loading, error, refresh, signIn, register, signOut, expire }}>{children}</SessionContext>
 }
 
 export function useValidatorSession() {

@@ -1,11 +1,11 @@
-import { parseCatalog, parseFacets, parseElement, parseMuseumCredits, parseTour, parseResourceAccess, parseValidatorSession } from './contract-validation'
+import { parseCatalog, parseFacets, parseElement, parseMuseumCredits, parseRegistration, parseTour, parseResourceAccess, parseValidatorSession } from './contract-validation'
 
 import { requestQuiz, requestQuizAnswer } from './quiz-client'
 import type { GuideQuizAnswer } from './contracts'
 import { parseVoiceAnswer, parseVoiceCapabilities, parseTranscription, voiceRequest } from './voice-client'
 import { requestGuide } from './guide-client'
 import { guideConfig } from './guide-config'
-import type { GuideQuestion, DetailCorrection } from './contracts'
+import type { GuideQuestion, DetailCorrection, RegistrationRequest } from './contracts'
 
 export class ApiError extends Error {
   constructor(public status: number, message: string) { super(message) }
@@ -31,7 +31,13 @@ async function validatorRequest(path: string, method = 'GET', body?: unknown, cs
       403: 'La sesión o esta ficha no están disponibles para corregir. Vuelve a iniciar sesión y consulta la ficha.',
       404: 'La ficha no está disponible', 422: 'Revisa la longitud de los textos y las interpretaciones de la ficha.',
       429: 'Demasiados intentos. Espera un minuto antes de volver a intentar.' }
-    throw new ApiError(response.status, messages[response.status] || 'El servicio no está disponible. Inténtalo de nuevo.')
+    const registration: Record<number, string> = {
+      401: 'El código de invitación no es válido. Pídelo de nuevo al responsable del museo.',
+      403: 'El registro de validadores no está habilitado en este momento.',
+      409: 'Ese usuario ya existe; elige otro.',
+      422: 'Revisa los datos: usuario de 3 a 100 caracteres (letras, números, punto o guion), tu nombre y una contraseña de al menos 12 caracteres.' }
+    const known = path === '/auth/register' ? registration[response.status] || messages[response.status] : messages[response.status]
+    throw new ApiError(response.status, known || 'El servicio no está disponible. Inténtalo de nuevo.')
   }
   return response.status === 204 ? null : response.json()
 }
@@ -46,6 +52,8 @@ export const api = {
   session: async (signal?: AbortSignal) => parseValidatorSession(await validatorRequest('/auth/session', 'GET', undefined, undefined, signal)),
   login: async (username: string, password: string) => parseValidatorSession(await validatorRequest('/auth/login', 'POST', { username, password })),
   logout: async (csrf: string) => { await validatorRequest('/auth/logout', 'POST', undefined, csrf) },
+  registration: async (signal?: AbortSignal) => parseRegistration(await validatorRequest('/auth/registration', 'GET', undefined, undefined, signal)),
+  register: async (details: RegistrationRequest) => parseValidatorSession(await validatorRequest('/auth/register', 'POST', details)),
   correct: async (slug: string, correction: DetailCorrection, csrf: string) => parseElement(await validatorRequest('/validator/elements/' + encodeURIComponent(slug), 'PATCH', correction, csrf)),
   resourceAccess: async (resource: string, signal?: AbortSignal) => parseResourceAccess(await get<unknown>('/resources/' + encodeURIComponent(resource) + '/access?schema_version=1', signal, 'POST')),
   resourceUrl: (element: string, resource: string) => `${base}/elements/${encodeURIComponent(element)}/resources/${encodeURIComponent(resource)}`,

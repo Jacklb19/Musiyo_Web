@@ -227,6 +227,18 @@ export interface QuizQuestion {
   source_id: string
 }
 
+export interface RegistrationAvailability {
+  schema_version?: 1
+  enabled: boolean
+}
+
+export interface RegistrationRequest {
+  username: string
+  name: string
+  password: string
+  invitation_code: string
+}
+
 export interface Resource {
   id: string
   kind: "model_3d" | "image" | "audio" | "video" | "narration" | "subtitles"
