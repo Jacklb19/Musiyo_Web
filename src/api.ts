@@ -1,7 +1,8 @@
 import { parseCatalog, parseFacets, parseElement, parseMuseumCredits, parseRegistration, parseTour, parseResourceAccess, parseValidatorSession } from './contract-validation'
 
 import { requestQuiz, requestQuizAnswer } from './quiz-client'
-import type { GuideQuizAnswer } from './contracts'
+import { requestSurvey, storeSurveyResponse } from './survey-client'
+import type { GuideQuizAnswer, GuideSurveyResponse } from './contracts'
 import { parseVoiceAnswer, parseVoiceCapabilities, parseTranscription, voiceRequest } from './voice-client'
 import { requestGuide } from './guide-client'
 import { guideConfig } from './guide-config'
@@ -48,6 +49,8 @@ export const api = {
   guideTranscription: async (audio: Blob, signal: AbortSignal) => parseTranscription(await voiceRequest(base, '/guide/transcriptions?schema_version=1', signal, 60000, audio)),
   quiz: (tourKey: string, signal: AbortSignal) => requestQuiz(base, tourKey, signal, guideConfig.requestTimeoutMs),
   quizAnswer: (answer: GuideQuizAnswer, signal: AbortSignal) => requestQuizAnswer(base, answer, signal, guideConfig.requestTimeoutMs),
+  survey: (tourKey: string, signal: AbortSignal) => requestSurvey(base, tourKey, signal, guideConfig.requestTimeoutMs),
+  surveyResponse: (response: GuideSurveyResponse, signal: AbortSignal) => storeSurveyResponse(base, response, signal, guideConfig.requestTimeoutMs),
   guideQuestion: (question: GuideQuestion, signal: AbortSignal) => requestGuide(base, question, signal, guideConfig.requestTimeoutMs),
   session: async (signal?: AbortSignal) => parseValidatorSession(await validatorRequest('/auth/session', 'GET', undefined, undefined, signal)),
   login: async (username: string, password: string) => parseValidatorSession(await validatorRequest('/auth/login', 'POST', { username, password })),
