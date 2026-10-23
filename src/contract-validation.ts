@@ -1,6 +1,6 @@
 import quizSchema from '../contracts/guide-quiz.v1.schema.json' with { type: 'json' }
 import quizAnswerSchema from '../contracts/guide-quiz-answer-result.v1.schema.json' with { type: 'json' }
-import type { GuideQuiz, GuideQuizAnswerResult } from './contracts.ts'
+import type { GuideQuiz, GuideQuizAnswerResult, GuideSurvey, GuideSurveyStored } from './contracts.ts'
 import guideResponseSchema from '../contracts/guide-response.v1.schema.json' with { type: 'json' }
 import tourSchema from '../contracts/tour.v1.schema.json' with { type: 'json' }
 import elementSchema from '../contracts/element.v1.schema.json' with { type: 'json' }
@@ -13,6 +13,8 @@ import facetSchema from '../contracts/catalog-facet.v1.schema.json' with { type:
 import accessSchema from '../contracts/resource-access.v1.schema.json' with { type: 'json' }
 import sessionSchema from '../contracts/validator-session.v1.schema.json' with { type: 'json' }
 import creditsSchema from '../contracts/museum-credits.v1.schema.json' with { type: 'json' }
+import surveySchema from '../contracts/guide-survey.v1.schema.json' with { type: 'json' }
+import surveyStoredSchema from '../contracts/guide-survey-stored.v1.schema.json' with { type: 'json' }
 import type { GuideResponse, CatalogFacet, CatalogPage, Element, MuseumCredits, PointPresence, RegistrationAvailability, ResourceAccess, ReturnToCatalog, SelectionConfirmed, SelectionCleared, Tour, ValidatorSession } from './contracts.ts'
 
 type Schema = {
@@ -197,4 +199,17 @@ export function parseQuizAnswer(value: unknown): GuideQuizAnswerResult {
   const answer = value as GuideQuizAnswerResult
   if (answer.citation.source_id !== answer.source.id) throw new Error('Fuente de encuesta incompatible')
   return answer
+}
+
+export function parseSurvey(value: unknown): GuideSurvey {
+  if (!matches(value, surveySchema as Schema, surveySchema as Schema)) throw new Error('Preguntas incompatibles')
+  const survey = value as GuideSurvey
+  if (new Set(survey.questions.map(q => q.id)).size !== survey.questions.length ||
+    survey.questions.some(q => new Set(q.options.map(o => o.id)).size !== q.options.length)) throw new Error('Opciones de preguntas incompatibles')
+  return survey
+}
+
+export function parseSurveyStored(value: unknown): GuideSurveyStored {
+  if (!matches(value, surveyStoredSchema as Schema, surveyStoredSchema as Schema)) throw new Error('Respuesta incompatible')
+  return value as GuideSurveyStored
 }

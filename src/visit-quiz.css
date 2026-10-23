@@ -2,3 +2,13 @@
 .entry-thumbnail{width:128px;aspect-ratio:4/3;object-fit:contain;grid-column:2;background:#f0e5d5;border-radius:12px}.collection-entry:has(.entry-thumbnail){grid-template-columns:40px 128px minmax(0,1fr) 44px;gap:24px}.collection-entry:has(.entry-thumbnail) .entry-content{grid-column:3}.collection-entry:has(.entry-thumbnail) .entry-action{grid-column:4}@media(max-width:600px){.collection-entry:has(.entry-thumbnail){grid-template-columns:22px 74px minmax(0,1fr) 28px;gap:10px}.entry-thumbnail{width:74px}.collection-entry:has(.entry-thumbnail) .entry-content h2{font-size:23px}.collection-entry:has(.entry-thumbnail) .entry-content>p:not(.eyebrow){grid-column:1/-1}.collection-entry:has(.entry-thumbnail){align-items:start}}
 
 .quiz-close{background:transparent;border:0;border-bottom:1px solid currentColor;padding:8px 0;color:inherit;font:inherit;cursor:pointer;width:fit-content}.quiz-feedback summary{font-weight:600}.quiz-feedback+button{margin-top:8px}
+
+.closing-conversation { margin: 1.5rem 0; padding: 1.25rem 1.5rem; border-left: 3px solid var(--color-gold); background: var(--color-surface); border-radius: 0 12px 12px 0; }
+.closing-conversation fieldset { border: 0; margin: 0; padding: 0; }
+.conversation-line { font-size: 1.08rem; line-height: 1.5; margin: 0 0 .9rem; }
+.conversation-reply { font-style: italic; opacity: .8; margin: 0 0 .5rem; }
+.conversation-options { display: flex; flex-wrap: wrap; gap: .6rem; margin-bottom: .75rem; }
+.conversation-options .pill { min-height: 44px; }
+.conversation-more { margin-top: .9rem; font-size: .95rem; }
+.conversation-more summary { cursor: pointer; text-decoration: underline; }
+.conversation-note { font-size: .92rem; opacity: .8; }

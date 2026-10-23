@@ -135,6 +135,29 @@ export interface GuideSpeech {
   data_base64: string
 }
 
+export interface GuideSurvey {
+  schema_version?: 1
+  survey_key: string
+  version: string
+  tour_key: string
+  notice: SurveyNotice
+  questions: (SurveyQuestion)[]
+  closing: string
+}
+
+export interface GuideSurveyResponse {
+  schema_version: 1
+  survey_key: string
+  version: string
+  platform?: "quest" | "web" | "desktop" | null
+  answers: (SurveyAnswer)[]
+}
+
+export interface GuideSurveyStored {
+  schema_version?: 1
+  status?: "stored"
+}
+
 export interface GuideTranscription {
   schema_version?: 1
   text: string
@@ -313,6 +336,35 @@ export interface Source {
   kind: "publication" | "interview" | "other"
   reference: string
   url?: string | null
+}
+
+export interface SurveyAnswer {
+  question_id: string
+  option_id: string
+}
+
+export interface SurveyNotice {
+  intro: string
+  accept_label: string
+  local_label: string
+  decline_label: string
+  more_label: string
+  title: string
+  text: string
+}
+
+export interface SurveyOption {
+  id: string
+  text: string
+}
+
+export interface SurveyQuestion {
+  id: string
+  kind?: "single_choice"
+  text: string
+  options: (SurveyOption)[]
+  reply?: string | null
+  optional?: boolean
 }
 
 export interface TextBlock {

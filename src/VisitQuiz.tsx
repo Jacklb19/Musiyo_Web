@@ -5,6 +5,7 @@ import type { GuideQuiz, GuideQuizAnswerResult } from './contracts'
 import { GuideRequestError } from './guide-client'
 import { quizCopy as text } from './quiz-copy'
 import { presentation } from './presentation-config'
+import { ClosingConversation } from './ClosingConversation'
 import './visit-quiz.css'
 
 export function VisitQuiz({ heading: Heading = 'h2' }: { heading?: 'h1' | 'h2' }) {
@@ -75,7 +76,7 @@ function QuizQuestions({ onFinished }: { onFinished: (finished: boolean) => void
     {!quiz && busy && <output>{text.loading}</output>}
     {!quiz && !busy && !error && <button className="pill secondary" disabled={remaining > 0} onClick={reload}>{text.retry}</button>}
     {quiz && quiz.questions.length === 0 && <output>{text.empty}</output>}
-    {quiz && quiz.questions.length > 0 && !question && <div aria-live="polite" className="quiz-done"><h3>{text.done}</h3><p>{text.doneText}</p><div className="quiz-actions"><Link className="pill dark" to="/creditos">{text.credits} <span aria-hidden="true">→</span></Link><Link className="underlined" to="/catalogo">{text.collection} <span aria-hidden="true">→</span></Link></div></div>}
+    {quiz && quiz.questions.length > 0 && !question && <div aria-live="polite" className="quiz-done"><h3>{text.done}</h3><p>{text.doneText}</p><ClosingConversation/><div className="quiz-actions"><Link className="pill dark" to="/creditos">{text.credits} <span aria-hidden="true">→</span></Link><Link className="underlined" to="/catalogo">{text.collection} <span aria-hidden="true">→</span></Link></div></div>}
     {question && <><p className="quiz-progress">{text.progress(index + 1, quiz!.questions.length)}</p>
       <form onSubmit={submit}><fieldset disabled={busy || !!answer || remaining > 0}><legend ref={heading} tabIndex={-1}>{question.text}</legend>
         {question.options.map(item => {
