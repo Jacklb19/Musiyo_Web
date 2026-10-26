@@ -87,9 +87,9 @@ export function RecordedAudio({ element, title, resource, subtitles, downloadRes
           }}/>
       </div><span className="audio-time">{formatTime(time)} <span>/ {formatTime(duration)}</span></span>
     </div>}
-    {audioFailed && <p role="alert">{copy.media.audioFailed} <button type="button" onClick={() => { setAudioFailed(false); setWaiting(false); setPlaying(false); setCanSeek(false); setTime(0); setAudioAttempt(value => value + 1) }}>{copy.common.retry}</button></p>}
+    {audioFailed && <p role="alert">{copy.media.audioFailed} <button type="button" className="text-button" onClick={() => { setAudioFailed(false); setWaiting(false); setPlaying(false); setCanSeek(false); setTime(0); setAudioAttempt(value => value + 1) }}>{copy.common.retry}</button></p>}
     {status === 'loading' && <output>{copy.media.cuesLoading}</output>}
-    {status === 'failed' && <p>{copy.media.cuesUnavailable} <button type="button" onClick={() => { setStatus('loading'); setAttempt(value => value + 1) }}>{copy.common.retry}</button></p>}
+    {status === 'failed' && <p>{copy.media.cuesUnavailable} <button type="button" className="text-button" onClick={() => { setStatus('loading'); setAttempt(value => value + 1) }}>{copy.common.retry}</button></p>}
     {status === 'ready' && <>
       <label className="reading-follow"><input type="checkbox" checked={follow} onChange={event => { setFollow(event.target.checked); updateTime() }} />{copy.media.followAudio}</label>
       {/* A bounded scroll reader needs keyboard access; these handlers only yield automatic scrolling. */}
