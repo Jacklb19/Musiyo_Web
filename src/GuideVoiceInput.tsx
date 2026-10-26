@@ -57,16 +57,16 @@ export function GuideVoiceInput({ capabilities, consent, disabled, onQuestion }:
   }
 
   const busy = !consent || pending || disabled
-  return <div>
+  return <div className="voice-input">
     {microphone && (recordingState === 'recording'
-      ? <p><button type="button" onClick={finish}>{voiceCopy.stop}</button>{' '}
-        <button type="button" onClick={discard}>{voiceCopy.discard}</button></p>
-      : <p><button type="button" disabled={busy || recordingState === 'starting'} onClick={() => void record()}>
+      ? <p><button type="button" className="button primary" onClick={finish}>{voiceCopy.stop}</button>{' '}
+        <button type="button" className="text-button" onClick={discard}>{voiceCopy.discard}</button></p>
+      : <p><button type="button" className="button secondary" disabled={busy || recordingState === 'starting'} onClick={() => void record()}>
         {voiceCopy.record(capabilities.max_input_seconds)}</button></p>)}
     <label htmlFor={id}>{voiceCopy.upload}</label>
     <input id={id} type="file" accept="audio/wav,.wav" disabled={busy || recordingState !== 'idle'}
       onChange={event => { void transcribe(event.target.files?.[0]); event.target.value = '' }} />
-    {pending && <button type="button" onClick={() => { controller.current?.abort(); setPending(false) }}>{voiceCopy.cancel}</button>}
+    {pending && <button type="button" className="text-button" onClick={() => { controller.current?.abort(); setPending(false) }}>{voiceCopy.cancel}</button>}
     <output>{recordingState === 'recording' ? voiceCopy.recording : pending ? voiceCopy.transcribing : message}</output>
   </div>
 }

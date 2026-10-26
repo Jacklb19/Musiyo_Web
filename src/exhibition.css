@@ -194,3 +194,11 @@ main{min-height:100vh}
 .note-marker a{font-size:12px}
 /* On phones the heading already names topic and community; the label keeps only related pieces. */
 @media(max-width:800px){.detail-plate{padding:22px;border-radius:24px 24px 3px 3px}.detail-plate dl,.detail-plate>.eyebrow{display:none}.detail-plate:not(:has(.plate-related,.plate-image)){display:none}.plate-related{margin-top:0;border-top:0;padding-top:0}}
+/* Buttons that read as links: without this the browser draws its own grey box and border around them. */
+button.underlined{background:none;border:0;border-bottom:1px solid currentColor;border-radius:0;color:inherit;cursor:pointer}
+/* The guide's voice question: record and stop as the page's buttons, the file picker as a quiet link. */
+.voice-input p{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.voice-input label{display:block;font-size:13px;margin-top:6px}
+.voice-input input[type=file]{font-size:13px;margin:6px 0 10px}
+.voice-input input[type=file]::file-selector-button{font:inherit;color:inherit;background:none;border:1px solid currentColor;border-radius:999px;padding:8px 16px;margin-right:12px;cursor:pointer}
+.voice-input output{display:block;font-size:13px}
