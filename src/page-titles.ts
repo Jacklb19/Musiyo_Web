@@ -5,7 +5,7 @@ const titles: Record<string, string> = {
   '/catalogo': `Colección · ${site}`,
   '/recorrido': `Museo 3D · ${site}`,
   '/recorrido/texto': `Salas en texto · ${site}`,
-  '/recorrido/cierre': `Junto al fogón · ${site}`,
+  '/recorrido/cierre': `Al terminar la visita · ${site}`,
   '/guia': `Pregúntale al guía · ${site}`,
   '/acerca': `Acerca del museo · ${site}`,
   '/privacidad': `Privacidad · ${site}`,

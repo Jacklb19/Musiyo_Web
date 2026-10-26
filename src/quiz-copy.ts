@@ -1,5 +1,5 @@
 export const quizCopy = {
-  eyebrow: 'Al terminar la visita', title: 'Un momento junto al fogón',
+  eyebrow: 'Al terminar la visita', title: '¿Qué te llevas del museo?',
   intro: 'Puedes cerrar el recorrido con unas preguntas sobre lo que descubriste. No hay tiempo límite ni nota; puedes pasar una pregunta o terminar cuando quieras.',
   start: 'Conversar sobre la visita', close: 'Terminar por ahora', loading: 'Preparando las preguntas…',
   empty: 'Por ahora no hay preguntas disponibles. Puedes seguir explorando las fichas y sus fuentes.',
