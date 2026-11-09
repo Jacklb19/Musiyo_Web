@@ -1,0 +1,104 @@
+.downloads-page {
+  padding-block-end: clamp(3rem, 7vw, 6rem);
+}
+
+.downloads-heading {
+  padding-block: clamp(2rem, 5vw, 4.5rem) clamp(1.75rem, 4vw, 3rem);
+}
+
+.downloads-heading h1 {
+  margin: .1em 0 .25em;
+  font: 600 clamp(3.25rem, 9vw, 7.5rem)/.95 var(--font-display);
+}
+
+.downloads-heading > p:last-child {
+  max-width: 51ch;
+  color: var(--color-muted);
+  font-size: clamp(1rem, 1.5vw, 1.2rem);
+  line-height: 1.65;
+}
+
+.download-editions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1rem, 3vw, 2.5rem);
+}
+
+.download-edition {
+  display: flex;
+  flex-direction: column;
+  padding: clamp(1.5rem, 4vw, 3rem);
+  border: 1px solid var(--color-border);
+  border-block-start: 3px solid var(--color-accent);
+  border-start-end-radius: var(--radius-card);
+  background: var(--color-surface);
+}
+
+.download-edition:nth-child(2) {
+  border-block-start-color: var(--color-positive);
+}
+
+.download-edition h2,
+.download-online h2 {
+  margin: .15em 0 .4em;
+  font: 600 clamp(2rem, 4vw, 3.5rem)/1.05 var(--font-display);
+}
+
+.download-edition > p:not(.eyebrow),
+.download-online p,
+.download-edition li {
+  color: var(--color-muted);
+  line-height: 1.6;
+}
+
+.download-edition ol {
+  margin: 1.25rem 0;
+  padding-inline-start: 1.3em;
+}
+
+.download-edition li + li {
+  margin-block-start: .35rem;
+}
+
+.download-instructions {
+  align-self: flex-start;
+}
+
+.download-action {
+  margin-block-start: auto;
+  padding-block-start: 1.5rem;
+}
+
+.download-unavailable {
+  margin: 0;
+  color: var(--color-muted);
+  font-weight: 600;
+}
+
+.download-online {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-block-start: clamp(2rem, 5vw, 4rem);
+  padding-block-start: 1.5rem;
+  border-block-start: 1px solid var(--color-border);
+}
+
+.download-online > div {
+  flex: 1 1 18rem;
+}
+
+.download-online h2 {
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+}
+
+.download-online p {
+  margin-block-end: 0;
+}
+
+@media (max-width: 650px) {
+  .download-editions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

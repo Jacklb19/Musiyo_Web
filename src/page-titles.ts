@@ -9,6 +9,7 @@ const titles: Record<string, string> = {
   '/guia': `Pregúntale al guía · ${site}`,
   '/acerca': `Acerca del museo · ${site}`,
   '/privacidad': `Privacidad · ${site}`,
+  '/descargas': `Descargas · ${site}`,
   '/creditos': `Créditos · ${site}`,
   '/validador': `Validadores · ${site}`,
 }
