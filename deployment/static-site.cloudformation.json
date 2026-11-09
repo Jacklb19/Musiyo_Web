@@ -105,6 +105,15 @@
     },
     "ApiRequest": {
       "Type": "AWS::CloudFront::OriginRequestPolicy",
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Preserve session security and the transient-processing consent emitted by existing clients.",
+          "must": [
+            "Forward both voice and survey consent headers alongside Origin and CSRF.",
+            "Keep cookies and query strings; API responses must remain uncached."
+          ]
+        }
+      },
       "Properties": {
         "OriginRequestPolicyConfig": {
           "Name": {
@@ -119,7 +128,9 @@
               "Origin",
               "Accept",
               "Content-Type",
-              "X-CSRF-Token"
+              "X-CSRF-Token",
+              "X-Musiyo-Voice-Consent",
+              "X-Musiyo-Survey-Consent"
             ]
           },
           "QueryStringsConfig": {
@@ -289,7 +300,37 @@
                   }
                 }
               }
+            },
+            {
+              "Sid": "DenyInsecureTransport",
+              "Effect": "Deny",
+              "Principal": "*",
+              "Action": "s3:*",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "WebBucket",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Sub": "${WebBucket.Arn}/*"
+                }
+              ],
+              "Condition": {
+                "Bool": {
+                  "aws:SecureTransport": false
+                }
+              }
             }
+          ]
+        }
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "CloudFront may read this private origin; all callers must use TLS.",
+          "must": [
+            "Keep the distribution SourceArn condition on the allow statement."
           ]
         }
       }
@@ -325,17 +366,38 @@
     "WebBucketName": {
       "Value": {
         "Ref": "WebBucket"
-      }
+      },
+      "Description": "WebBucketName"
     },
     "DistributionId": {
       "Value": {
         "Ref": "Distribution"
-      }
+      },
+      "Description": "DistributionId"
     },
     "WebUrl": {
       "Value": {
         "Fn::Sub": "https://${Distribution.DomainName}"
-      }
+      },
+      "Description": "WebUrl"
+    }
+  },
+  "Metadata": {
+    "AWSToolsMetrics": {
+      "AWSAgentToolkit": "aws-cloudformation@3"
+    },
+    "com.aws.cloudformation.Context": {
+      "must": [
+        "Private S3 origin with OAC; API origin uses HTTPS and session traffic is never cached.",
+        "Missing Unity/player objects keep their errors; only React routes rewrite to index.html.",
+        "Keep the generated CloudFront hostname; no domain purchase or flat-rate subscription."
+      ],
+      "ref": [
+        {
+          "at": "OPERATIONS.txt",
+          "has": "static manifest MIME, compression, cache and rollout procedure"
+        }
+      ]
     }
   }
 }

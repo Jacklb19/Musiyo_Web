@@ -99,6 +99,7 @@ export const exhibitionCopy = {
   "collectionIntro": "Una pieza puede ser el comienzo.",
   "visitOpening": "Una visita para mirar,",
   "visitAtOwnPace": "Una visita, a tu ritmo",
+  "downloads": "Descargas",
   "validators": "Validadores",
   "severalNames": "Varios nombres.",
   "viewCollection": "Ver toda la colección",

@@ -1,4 +1,5 @@
 import { Credits } from './Credits'
+import { Downloads } from './Downloads'
 import { VisitQuiz } from './VisitQuiz'
 import { ExhibitionHome, ExhibitionCollection, ExhibitionDetail, VisitPreparation, PublicShell, PageLifecycle } from './Exhibition'
 import { useCallback, useEffect, useState } from 'react'
@@ -192,6 +193,7 @@ export default function App() {
     <Route path="/acerca" element={<div className="legacy-content"><About/></div>}/>
     <Route path="/privacidad" element={<div className="legacy-content"><Privacy/></div>}/>
     <Route path="/creditos" element={<Credits/>}/>
+    <Route path="/descargas" element={<Downloads/>}/>
     <Route path="/validador" element={<div className="legacy-content"><Validator/></div>}/>
     <Route path="/validador/:id" element={<div className="legacy-content"><Validator/></div>}/>
     <Route path="*" element={<div className="legacy-content"><NotFound/></div>}/>
