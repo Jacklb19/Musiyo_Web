@@ -34,6 +34,16 @@ must revalidate. Hashed Vite assets can be immutable. .wasm is application/wasm,
 .framework.js is JavaScript, .data is binary; .br/.gz have corresponding encodings.
 .unityweb fallback streams are not given an HTTP compression encoding.
 
+Voice and survey requests also forward X-Musiyo-Voice-Consent and
+X-Musiyo-Survey-Consent. Dropping either header disables its consent-protected
+operation even when the body is valid. The client/policy integration test guards
+that boundary without invoking a provider or writing survey responses.
+
+S3 GetObject-only origins can return 403 for a nonexistent key. In AWS verify
+that missing player objects preserve an error and never become HTML; local Vite
+checks explicitly require 404. Do not grant bucket listing merely to disguise
+the origin's missing-key status.
+
 Before public use check the actual CDN headers, React direct routes, missing Wasm
 404 behavior, authenticated API cookie/CSRF, signed resource CORS, security policy,
 and API restart. Offline templates/tests do not establish a working AWS deployment.

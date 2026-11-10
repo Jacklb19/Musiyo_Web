@@ -3,8 +3,28 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { runInNewContext } from 'node:vm'
 import { objectMetadata } from '../scripts/static-deployment.mjs'
+import { voiceRequest } from '../src/voice-client.ts'
+import { storeSurveyResponse, surveyResponse } from '../src/survey-client.ts'
 
 const rewrite = readFileSync(new URL('../deployment/spa-rewrite.js', import.meta.url), 'utf8')
+
+test('CloudFront forwards the consent headers emitted by voice and survey clients', async () => {
+  const template = JSON.parse(readFileSync(new URL('../deployment/static-site.cloudformation.json', import.meta.url), 'utf8'))
+  const policy = template.Resources.ApiRequest.Properties.OriginRequestPolicyConfig
+  const forwarded = new Set(policy.HeadersConfig.Headers.map(name => name.toLowerCase()))
+  const fixture = name => JSON.parse(readFileSync(new URL('../contracts/examples/' + name + '.json', import.meta.url), 'utf8'))
+  const capture = (body, status = 200) => async (_url, options) => {
+    for (const name of Object.keys(options.headers)) {
+      assert.ok(forwarded.has(name.toLowerCase()), `CloudFront would drop ${name} required by this client`)
+    }
+    return new Response(JSON.stringify(body), { status })
+  }
+  const signal = new AbortController().signal
+  await voiceRequest('/api/v1', '/guide/voice-answers', signal, 1000,
+    { schema_version: 1, question: 'Pregunta sintética' }, capture(fixture('guide_voice_disabled')))
+  await storeSurveyResponse('/api/v1', surveyResponse(fixture('guide_survey'), { liked: 'a-lot' }),
+    signal, 1000, capture({ schema_version: 1, status: 'stored' }, 201))
+})
 
 test('Unity MIME types and precompressed encodings are explicit', () => {
   assert.equal(objectMetadata('unity/Build/Museum.wasm.br').content_type, 'application/wasm')
