@@ -62,3 +62,10 @@ test('the content security policy lets the Unity loader run its framework from a
   assert.ok(policy[0].split(' ').includes('blob:'), 'Unity WebGL loads its framework through URL.createObjectURL')
   assert.ok(policy[0].split(' ').includes("'wasm-unsafe-eval'"))
 })
+
+test('the content security policy lets the 3D viewers read the textures they unpack into blob URLs', () => {
+  const template = readFileSync(new URL('../deployment/static-site.cloudformation.json', import.meta.url), 'utf8')
+  const policy = template.match(/connect-src [^;]*/)
+  assert.ok(policy, 'connect-src is declared')
+  assert.ok(policy[0].split(' ').includes('blob:'), 'model-viewer reads embedded GLB textures through fetch(blob:)')
+})
