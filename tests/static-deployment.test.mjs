@@ -54,3 +54,11 @@ test('web fonts, the tab icon and the share image are served with their own type
   assert.equal(objectMetadata('favicon.svg').content_type, 'image/svg+xml')
   assert.equal(objectMetadata('og-image.png').content_type, 'image/png')
 })
+
+test('the content security policy lets the Unity loader run its framework from a blob URL', () => {
+  const template = readFileSync(new URL('../deployment/static-site.cloudformation.json', import.meta.url), 'utf8')
+  const policy = template.match(/script-src [^;]*/)
+  assert.ok(policy, 'script-src is declared')
+  assert.ok(policy[0].split(' ').includes('blob:'), 'Unity WebGL loads its framework through URL.createObjectURL')
+  assert.ok(policy[0].split(' ').includes("'wasm-unsafe-eval'"))
+})
